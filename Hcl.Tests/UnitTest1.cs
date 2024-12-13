@@ -1,4 +1,4 @@
-namespace CSharpProject.Tests;
+namespace Hcl.Tests;
 
 public class Tests
 {

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpProject\CSharpProject.csproj" />
+    <ProjectReference Include="..\Hcl\Hcl.csproj" />
   </ItemGroup>
 
 </Project>
