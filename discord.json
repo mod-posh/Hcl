@@ -1,0 +1,6 @@
+{
+  "uri": "https://discord.com/api/webhooks/",
+  "message": {
+    "content": "This is a test message"
+  }
+}
