@@ -1,10 +1,10 @@
 grammar Hcl;
 
-// Entry point for the HCL file, allowing any number of blocks (modules, resources, etc.)
+// Entry point for the HCL file, allowing any number of blocks
 document: block* EOF;
 
-// Definition of a block (module, resource, etc.)
-block: IDENTIFIER STRING (STRING)? '{' body '}';
+// Definition of a block (module, resource, or data block)
+block: IDENTIFIER STRING STRING? '{' body '}';
 
 // The body of a block, allowing attributes, nested blocks, or comments
 body: (attribute | nestedBlock | COMMENT)*;
@@ -12,30 +12,39 @@ body: (attribute | nestedBlock | COMMENT)*;
 // Attributes are key-value pairs like `key = value`
 attribute: IDENTIFIER '=' value;
 
-// Nested blocks, e.g., `cluster_config { ... }`
+// Nested blocks, e.g., `managed { ... }`
 nestedBlock: IDENTIFIER '{' body '}';
 
-// Values: Can be booleans, strings, numbers, lists, maps, references, or interpolations
+// Values: Can be booleans, strings, numbers, lists, maps, references, interpolations, or function calls
 value: BOOL
      | STRING
      | NUMBER
      | list
      | map
      | reference
-     | interpolation;
+     | interpolation
+     | functionCall;
 
 // Lists: Sequences of values enclosed in `[ ]`
 list: '[' (value (',' value)*)? ']';
 
 // Maps: Key-value pairs enclosed in `{ }`
 map: '{' (mapEntry (',' mapEntry)*)? '}';
-mapEntry: (IDENTIFIER | STRING) '=' value; // Allow both IDENTIFIER and STRING as map keys
+mapEntry: (STRING | IDENTIFIER) '=' value;
 
-// Interpolations: `${var.name}`
-interpolation: '${' IDENTIFIER ('.' IDENTIFIER)* '}';
+// Interpolations: `${expression}`
+interpolation: '${' expression '}';
 
-// References: `module.resource.property`
-reference: IDENTIFIER ('.' IDENTIFIER)+;
+// References: `module.resource.property` or similar
+reference: IDENTIFIER ('.' IDENTIFIER)*;
+
+// Function calls: `function(args...)`
+functionCall: IDENTIFIER '(' (value (',' value)*)? ')';
+
+// Expressions within interpolations
+expression: reference
+          | functionCall
+          | value;
 
 // Tokens
 

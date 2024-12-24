@@ -140,4 +140,24 @@ public interface IHclListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitReference([NotNull] HclParser.ReferenceContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.functionCall"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterFunctionCall([NotNull] HclParser.FunctionCallContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.functionCall"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitFunctionCall([NotNull] HclParser.FunctionCallContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterExpression([NotNull] HclParser.ExpressionContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitExpression([NotNull] HclParser.ExpressionContext context);
 }

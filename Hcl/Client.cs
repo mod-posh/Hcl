@@ -85,7 +85,7 @@ namespace ModPosh.Hcl
             {
                 ["type"] = context.IDENTIFIER().GetText(),
                 ["name"] = context.STRING(0).GetText().Trim('"'),
-                ["optionalLabel"] = context.STRING(1)?.GetText().Trim('"'),
+                ["optionalLabel"] = context.STRING(1)?.GetText()?.Trim('"'),
                 ["body"] = VisitBody(context.body())
             };
             return blockData;
@@ -125,15 +125,15 @@ namespace ModPosh.Hcl
             if (context.NUMBER() != null)
                 return double.Parse(context.NUMBER().GetText());
             if (context.BOOL() != null)
-                return context.BOOL().GetText() == "true"; // Handle BOOL explicitly
+                return context.BOOL().GetText() == "true"; // Explicit handling for BOOL
             if (context.list() != null)
                 return VisitList(context.list());
             if (context.map() != null)
                 return VisitMap(context.map());
-            if (context.interpolation() != null)
-                return VisitInterpolation(context.interpolation());
             if (context.reference() != null)
                 return VisitReference(context.reference());
+            if (context.interpolation() != null)
+                return VisitInterpolation(context.interpolation());
             return null;
         }
 
@@ -163,7 +163,7 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Visits a map and extracts its key-value pairs.
+        /// Visits a map and extracts key-value pairs.
         /// </summary>
         /// <param name="context">The map context from the parser.</param>
         /// <returns>A dictionary representing the map.</returns>
@@ -172,7 +172,7 @@ namespace ModPosh.Hcl
             var map = new Dictionary<string, object?>();
             foreach (var entry in context.mapEntry())
             {
-                string key = entry.IDENTIFIER()?.GetText() ?? entry.STRING()?.GetText().Trim('"');
+                var key = entry.STRING()?.GetText()?.Trim('"') ?? entry.IDENTIFIER()?.GetText();
                 if (key != null)
                 {
                     map[key] = VisitValue(entry.value());
