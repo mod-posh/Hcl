@@ -75,7 +75,7 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Visits a block and extracts its type, name, and body.
+        /// Visits a block and extracts its type, name, optional label, and body.
         /// </summary>
         /// <param name="context">The block context from the parser.</param>
         /// <returns>A dictionary representing the block's data.</returns>
@@ -84,24 +84,32 @@ namespace ModPosh.Hcl
             var blockData = new Dictionary<string, object?>
             {
                 ["type"] = context.IDENTIFIER().GetText(),
-                ["name"] = context.STRING().GetText().Trim('"'),
+                ["name"] = context.STRING(0).GetText().Trim('"'),
+                ["optionalLabel"] = context.STRING(1)?.GetText().Trim('"'),
                 ["body"] = VisitBody(context.body())
             };
             return blockData;
         }
 
         /// <summary>
-        /// Visits the body of a block and extracts all attributes.
+        /// Visits the body of a block and extracts all attributes and nested blocks.
         /// </summary>
         /// <param name="context">The body context from the parser.</param>
-        /// <returns>A dictionary representing the attributes of the block.</returns>
+        /// <returns>A dictionary representing the attributes and nested blocks.</returns>
         private Dictionary<string, object?> VisitBody(HclParser.BodyContext context)
         {
             var bodyData = new Dictionary<string, object?>();
+
             foreach (var attr in context.attribute())
             {
                 bodyData[attr.IDENTIFIER().GetText()] = VisitValue(attr.value());
             }
+
+            foreach (var nested in context.nestedBlock())
+            {
+                bodyData[nested.IDENTIFIER().GetText()] = VisitBody(nested.body());
+            }
+
             return bodyData;
         }
 
@@ -124,7 +132,19 @@ namespace ModPosh.Hcl
                 return VisitMap(context.map());
             if (context.interpolation() != null)
                 return VisitInterpolation(context.interpolation());
+            if (context.reference() != null)
+                return VisitReference(context.reference());
             return null;
+        }
+
+        /// <summary>
+        /// Visits a reference and constructs its textual representation.
+        /// </summary>
+        /// <param name="context">The reference context from the parser.</param>
+        /// <returns>The reference text as a string.</returns>
+        private string VisitReference(HclParser.ReferenceContext context)
+        {
+            return string.Join(".", context.IDENTIFIER().Select(id => id.GetText()));
         }
 
         /// <summary>

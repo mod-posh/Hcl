@@ -84,6 +84,18 @@ public partial class HclBaseListener : IHclListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitAttribute([NotNull] HclParser.AttributeContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.nestedBlock"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterNestedBlock([NotNull] HclParser.NestedBlockContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.nestedBlock"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitNestedBlock([NotNull] HclParser.NestedBlockContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.value"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -143,6 +155,18 @@ public partial class HclBaseListener : IHclListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitInterpolation([NotNull] HclParser.InterpolationContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.reference"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterReference([NotNull] HclParser.ReferenceContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.reference"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitReference([NotNull] HclParser.ReferenceContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

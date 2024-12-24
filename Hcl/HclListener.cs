@@ -71,6 +71,16 @@ public interface IHclListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitAttribute([NotNull] HclParser.AttributeContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.nestedBlock"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterNestedBlock([NotNull] HclParser.NestedBlockContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.nestedBlock"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitNestedBlock([NotNull] HclParser.NestedBlockContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.value"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -120,4 +130,14 @@ public interface IHclListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitInterpolation([NotNull] HclParser.InterpolationContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.reference"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterReference([NotNull] HclParser.ReferenceContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.reference"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitReference([NotNull] HclParser.ReferenceContext context);
 }
