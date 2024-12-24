@@ -125,7 +125,7 @@ namespace ModPosh.Hcl
             if (context.NUMBER() != null)
                 return double.Parse(context.NUMBER().GetText());
             if (context.BOOL() != null)
-                return context.BOOL().GetText() == "true"; // Explicit handling for BOOL
+                return context.BOOL().GetText() == "true"; // Handle BOOL explicitly
             if (context.list() != null)
                 return VisitList(context.list());
             if (context.map() != null)
@@ -172,7 +172,11 @@ namespace ModPosh.Hcl
             var map = new Dictionary<string, object?>();
             foreach (var entry in context.mapEntry())
             {
-                map[entry.IDENTIFIER().GetText()] = VisitValue(entry.value());
+                string key = entry.IDENTIFIER()?.GetText() ?? entry.STRING()?.GetText().Trim('"');
+                if (key != null)
+                {
+                    map[key] = VisitValue(entry.value());
+                }
             }
             return map;
         }

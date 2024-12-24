@@ -1,58 +1,58 @@
 grammar Hcl;
 
-// Entry point of the grammar, allowing multiple blocks in a document
+// Entry point for the HCL file, allowing any number of blocks (modules, resources, etc.)
 document: block* EOF;
 
-// A block represents resources or modules, e.g., `resource "type" "name" { body }`
+// Definition of a block (module, resource, etc.)
 block: IDENTIFIER STRING (STRING)? '{' body '}';
 
-// The body of a block contains attributes, nested blocks, or comments
+// The body of a block, allowing attributes, nested blocks, or comments
 body: (attribute | nestedBlock | COMMENT)*;
 
-// Attributes are key-value pairs defined with the syntax `key = value`
+// Attributes are key-value pairs like `key = value`
 attribute: IDENTIFIER '=' value;
 
-// Nested blocks, e.g., `cluster { ... }`
+// Nested blocks, e.g., `cluster_config { ... }`
 nestedBlock: IDENTIFIER '{' body '}';
 
-// Values can be booleans, strings, numbers, lists, maps, interpolations, or references
+// Values: Can be booleans, strings, numbers, lists, maps, references, or interpolations
 value: BOOL
      | STRING
      | NUMBER
      | list
      | map
-     | interpolation
-     | reference;
+     | reference
+     | interpolation;
 
-// Lists are sequences of values enclosed in `[ ]`
+// Lists: Sequences of values enclosed in `[ ]`
 list: '[' (value (',' value)*)? ']';
 
-// Maps are key-value pairs enclosed in `{ }`
+// Maps: Key-value pairs enclosed in `{ }`
 map: '{' (mapEntry (',' mapEntry)*)? '}';
-mapEntry: IDENTIFIER '=' value;
+mapEntry: (IDENTIFIER | STRING) '=' value; // Allow both IDENTIFIER and STRING as map keys
 
-// Interpolations like `${var.name}`
+// Interpolations: `${var.name}`
 interpolation: '${' IDENTIFIER ('.' IDENTIFIER)* '}';
 
-// References like `google_bigtable_instance.xyz-big-table.name`
+// References: `module.resource.property`
 reference: IDENTIFIER ('.' IDENTIFIER)+;
 
 // Tokens
 
-// Boolean values, defined as `true` or `false`
+// Boolean values (`true` or `false`)
 BOOL: 'true' | 'false';
 
-// Strings enclosed in double quotes
+// Strings, supporting special characters and escape sequences
 STRING: '"' (~["\\] | '\\' .)* '"';
 
-// Numbers, including integers and floating-point values
+// Numbers (integers or floats)
 NUMBER: [0-9]+ ('.' [0-9]+)?;
 
-// Identifiers for keys, variables, and resource types
+// Identifiers (used for keys, resource types, etc.)
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_-]*;
 
-// Comments start with `#` and run to the end of the line
+// Comments (`# ...`)
 COMMENT: '#' ~[\r\n]* -> skip;
 
-// Skip whitespace characters
+// Skip whitespace
 WHITESPACE: [ \t\r\n]+ -> skip;
