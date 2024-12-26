@@ -36,24 +36,28 @@ public partial class HclParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
-		T__9=10, BOOL=11, STRING=12, NUMBER=13, IDENTIFIER=14, COMMENT=15, WHITESPACE=16;
+		T__0=1, T__1=2, BOOL=3, STRING=4, NUMBER=5, IDENTIFIER=6, COMMENT=7, WHITESPACE=8, 
+		EQUAL=9, OPEN_BRACE=10, CLOSE_BRACE=11, OPEN_BRACKET=12, CLOSE_BRACKET=13, 
+		OPEN_PAREN=14, CLOSE_PAREN=15, COMMA=16, NEWLINE=17;
 	public const int
 		RULE_document = 0, RULE_block = 1, RULE_body = 2, RULE_attribute = 3, 
-		RULE_nestedBlock = 4, RULE_value = 5, RULE_list = 6, RULE_map = 7, RULE_mapEntry = 8, 
-		RULE_interpolation = 9, RULE_reference = 10, RULE_functionCall = 11, RULE_expression = 12;
+		RULE_indexedAttribute = 4, RULE_nestedBlock = 5, RULE_list = 6, RULE_map = 7, 
+		RULE_mapEntry = 8, RULE_mapKey = 9, RULE_value = 10, RULE_interpolation = 11, 
+		RULE_reference = 12, RULE_functionCall = 13, RULE_expression = 14;
 	public static readonly string[] ruleNames = {
-		"document", "block", "body", "attribute", "nestedBlock", "value", "list", 
-		"map", "mapEntry", "interpolation", "reference", "functionCall", "expression"
+		"document", "block", "body", "attribute", "indexedAttribute", "nestedBlock", 
+		"list", "map", "mapEntry", "mapKey", "value", "interpolation", "reference", 
+		"functionCall", "expression"
 	};
 
 	private static readonly string[] _LiteralNames = {
-		null, "'{'", "'}'", "'='", "'['", "','", "']'", "'${'", "'.'", "'('", 
-		"')'"
+		null, "'${'", "'.'", null, null, null, null, null, null, "'='", "'{'", 
+		"'}'", "'['", "']'", "'('", "')'", "','"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, null, null, null, null, null, null, null, null, null, null, "BOOL", 
-		"STRING", "NUMBER", "IDENTIFIER", "COMMENT", "WHITESPACE"
+		null, null, null, "BOOL", "STRING", "NUMBER", "IDENTIFIER", "COMMENT", 
+		"WHITESPACE", "EQUAL", "OPEN_BRACE", "CLOSE_BRACE", "OPEN_BRACKET", "CLOSE_BRACKET", 
+		"OPEN_PAREN", "CLOSE_PAREN", "COMMA", "NEWLINE"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -120,21 +124,21 @@ public partial class HclParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 29;
+			State = 33;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while (_la==IDENTIFIER) {
 				{
 				{
-				State = 26;
+				State = 30;
 				block();
 				}
 				}
-				State = 31;
+				State = 35;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 32;
+			State = 36;
 			Match(Eof);
 			}
 		}
@@ -155,9 +159,11 @@ public partial class HclParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING(int i) {
 			return GetToken(HclParser.STRING, i);
 		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_BRACE() { return GetToken(HclParser.OPEN_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public BodyContext body() {
 			return GetRuleContext<BodyContext>(0);
 		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_BRACE() { return GetToken(HclParser.CLOSE_BRACE, 0); }
 		public BlockContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -183,26 +189,26 @@ public partial class HclParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 34;
+			State = 38;
 			Match(IDENTIFIER);
-			State = 35;
+			State = 39;
 			Match(STRING);
-			State = 37;
+			State = 41;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==STRING) {
 				{
-				State = 36;
+				State = 40;
 				Match(STRING);
 				}
 			}
 
-			State = 39;
-			Match(T__0);
-			State = 40;
+			State = 43;
+			Match(OPEN_BRACE);
+			State = 44;
 			body();
-			State = 41;
-			Match(T__1);
+			State = 45;
+			Match(CLOSE_BRACE);
 			}
 		}
 		catch (RecognitionException re) {
@@ -258,35 +264,35 @@ public partial class HclParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 48;
+			State = 52;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while (_la==IDENTIFIER || _la==COMMENT) {
 				{
-				State = 46;
+				State = 50;
 				ErrorHandler.Sync(this);
 				switch ( Interpreter.AdaptivePredict(TokenStream,2,Context) ) {
 				case 1:
 					{
-					State = 43;
+					State = 47;
 					attribute();
 					}
 					break;
 				case 2:
 					{
-					State = 44;
+					State = 48;
 					nestedBlock();
 					}
 					break;
 				case 3:
 					{
-					State = 45;
+					State = 49;
 					Match(COMMENT);
 					}
 					break;
 				}
 				}
-				State = 50;
+				State = 54;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
@@ -305,8 +311,15 @@ public partial class HclParser : Parser {
 
 	public partial class AttributeContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(HclParser.IDENTIFIER, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EQUAL() { return GetToken(HclParser.EQUAL, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value() {
 			return GetRuleContext<ValueContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public MapContext map() {
+			return GetRuleContext<MapContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IndexedAttributeContext indexedAttribute() {
+			return GetRuleContext<IndexedAttributeContext>(0);
 		}
 		public AttributeContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -330,14 +343,92 @@ public partial class HclParser : Parser {
 		AttributeContext _localctx = new AttributeContext(Context, State);
 		EnterRule(_localctx, 6, RULE_attribute);
 		try {
+			State = 65;
+			ErrorHandler.Sync(this);
+			switch ( Interpreter.AdaptivePredict(TokenStream,4,Context) ) {
+			case 1:
+				EnterOuterAlt(_localctx, 1);
+				{
+				State = 55;
+				Match(IDENTIFIER);
+				State = 56;
+				Match(EQUAL);
+				State = 57;
+				value();
+				}
+				break;
+			case 2:
+				EnterOuterAlt(_localctx, 2);
+				{
+				State = 58;
+				Match(IDENTIFIER);
+				State = 59;
+				Match(EQUAL);
+				State = 60;
+				map();
+				}
+				break;
+			case 3:
+				EnterOuterAlt(_localctx, 3);
+				{
+				State = 61;
+				indexedAttribute();
+				State = 62;
+				Match(EQUAL);
+				State = 63;
+				value();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class IndexedAttributeContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(HclParser.IDENTIFIER, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_BRACKET() { return GetToken(HclParser.OPEN_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(HclParser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_BRACKET() { return GetToken(HclParser.CLOSE_BRACKET, 0); }
+		public IndexedAttributeContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_indexedAttribute; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.EnterIndexedAttribute(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.ExitIndexedAttribute(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public IndexedAttributeContext indexedAttribute() {
+		IndexedAttributeContext _localctx = new IndexedAttributeContext(Context, State);
+		EnterRule(_localctx, 8, RULE_indexedAttribute);
+		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 51;
+			State = 67;
 			Match(IDENTIFIER);
-			State = 52;
-			Match(T__2);
-			State = 53;
-			value();
+			State = 68;
+			Match(OPEN_BRACKET);
+			State = 69;
+			Match(STRING);
+			State = 70;
+			Match(CLOSE_BRACKET);
 			}
 		}
 		catch (RecognitionException re) {
@@ -353,9 +444,11 @@ public partial class HclParser : Parser {
 
 	public partial class NestedBlockContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(HclParser.IDENTIFIER, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_BRACE() { return GetToken(HclParser.OPEN_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public BodyContext body() {
 			return GetRuleContext<BodyContext>(0);
 		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_BRACE() { return GetToken(HclParser.CLOSE_BRACE, 0); }
 		public NestedBlockContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -376,18 +469,345 @@ public partial class HclParser : Parser {
 	[RuleVersion(0)]
 	public NestedBlockContext nestedBlock() {
 		NestedBlockContext _localctx = new NestedBlockContext(Context, State);
-		EnterRule(_localctx, 8, RULE_nestedBlock);
+		EnterRule(_localctx, 10, RULE_nestedBlock);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 55;
+			State = 72;
 			Match(IDENTIFIER);
-			State = 56;
-			Match(T__0);
-			State = 57;
+			State = 73;
+			Match(OPEN_BRACE);
+			State = 74;
 			body();
-			State = 58;
-			Match(T__1);
+			State = 75;
+			Match(CLOSE_BRACE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class ListContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_BRACKET() { return GetToken(HclParser.OPEN_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_BRACKET() { return GetToken(HclParser.CLOSE_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ValueContext[] value() {
+			return GetRuleContexts<ValueContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value(int i) {
+			return GetRuleContext<ValueContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IndexedAttributeContext[] indexedAttribute() {
+			return GetRuleContexts<IndexedAttributeContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IndexedAttributeContext indexedAttribute(int i) {
+			return GetRuleContext<IndexedAttributeContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(HclParser.COMMA); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA(int i) {
+			return GetToken(HclParser.COMMA, i);
+		}
+		public ListContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_list; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.EnterList(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.ExitList(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public ListContext list() {
+		ListContext _localctx = new ListContext(Context, State);
+		EnterRule(_localctx, 12, RULE_list);
+		int _la;
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 77;
+			Match(OPEN_BRACKET);
+			State = 80;
+			ErrorHandler.Sync(this);
+			switch ( Interpreter.AdaptivePredict(TokenStream,5,Context) ) {
+			case 1:
+				{
+				State = 78;
+				value();
+				}
+				break;
+			case 2:
+				{
+				State = 79;
+				indexedAttribute();
+				}
+				break;
+			}
+			State = 89;
+			ErrorHandler.Sync(this);
+			_la = TokenStream.LA(1);
+			while (_la==COMMA) {
+				{
+				{
+				State = 82;
+				Match(COMMA);
+				State = 85;
+				ErrorHandler.Sync(this);
+				switch ( Interpreter.AdaptivePredict(TokenStream,6,Context) ) {
+				case 1:
+					{
+					State = 83;
+					value();
+					}
+					break;
+				case 2:
+					{
+					State = 84;
+					indexedAttribute();
+					}
+					break;
+				}
+				}
+				}
+				State = 91;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+			}
+			State = 92;
+			Match(CLOSE_BRACKET);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class MapContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_BRACE() { return GetToken(HclParser.OPEN_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_BRACE() { return GetToken(HclParser.CLOSE_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public MapEntryContext[] mapEntry() {
+			return GetRuleContexts<MapEntryContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public MapEntryContext mapEntry(int i) {
+			return GetRuleContext<MapEntryContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(HclParser.COMMA); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA(int i) {
+			return GetToken(HclParser.COMMA, i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] NEWLINE() { return GetTokens(HclParser.NEWLINE); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode NEWLINE(int i) {
+			return GetToken(HclParser.NEWLINE, i);
+		}
+		public MapContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_map; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.EnterMap(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.ExitMap(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public MapContext map() {
+		MapContext _localctx = new MapContext(Context, State);
+		EnterRule(_localctx, 14, RULE_map);
+		int _la;
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 94;
+			Match(OPEN_BRACE);
+			State = 107;
+			ErrorHandler.Sync(this);
+			_la = TokenStream.LA(1);
+			while (_la==STRING || _la==IDENTIFIER) {
+				{
+				{
+				State = 95;
+				mapEntry();
+				State = 99;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				while (_la==COMMA || _la==NEWLINE) {
+					{
+					{
+					State = 96;
+					_la = TokenStream.LA(1);
+					if ( !(_la==COMMA || _la==NEWLINE) ) {
+					ErrorHandler.RecoverInline(this);
+					}
+					else {
+						ErrorHandler.ReportMatch(this);
+					    Consume();
+					}
+					}
+					}
+					State = 101;
+					ErrorHandler.Sync(this);
+					_la = TokenStream.LA(1);
+				}
+				State = 103;
+				ErrorHandler.Sync(this);
+				switch ( Interpreter.AdaptivePredict(TokenStream,9,Context) ) {
+				case 1:
+					{
+					State = 102;
+					mapEntry();
+					}
+					break;
+				}
+				}
+				}
+				State = 109;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+			}
+			State = 110;
+			Match(CLOSE_BRACE);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class MapEntryContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public MapKeyContext mapKey() {
+			return GetRuleContext<MapKeyContext>(0);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EQUAL() { return GetToken(HclParser.EQUAL, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value() {
+			return GetRuleContext<ValueContext>(0);
+		}
+		public MapEntryContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_mapEntry; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.EnterMapEntry(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.ExitMapEntry(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public MapEntryContext mapEntry() {
+		MapEntryContext _localctx = new MapEntryContext(Context, State);
+		EnterRule(_localctx, 16, RULE_mapEntry);
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 112;
+			mapKey();
+			State = 113;
+			Match(EQUAL);
+			State = 114;
+			value();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class MapKeyContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(HclParser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(HclParser.IDENTIFIER, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public IndexedAttributeContext indexedAttribute() {
+			return GetRuleContext<IndexedAttributeContext>(0);
+		}
+		public MapKeyContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_mapKey; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.EnterMapKey(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IHclListener typedListener = listener as IHclListener;
+			if (typedListener != null) typedListener.ExitMapKey(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public MapKeyContext mapKey() {
+		MapKeyContext _localctx = new MapKeyContext(Context, State);
+		EnterRule(_localctx, 18, RULE_mapKey);
+		try {
+			State = 119;
+			ErrorHandler.Sync(this);
+			switch ( Interpreter.AdaptivePredict(TokenStream,11,Context) ) {
+			case 1:
+				EnterOuterAlt(_localctx, 1);
+				{
+				State = 116;
+				Match(STRING);
+				}
+				break;
+			case 2:
+				EnterOuterAlt(_localctx, 2);
+				{
+				State = 117;
+				Match(IDENTIFIER);
+				}
+				break;
+			case 3:
+				EnterOuterAlt(_localctx, 3);
+				{
+				State = 118;
+				indexedAttribute();
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -440,274 +860,67 @@ public partial class HclParser : Parser {
 	[RuleVersion(0)]
 	public ValueContext value() {
 		ValueContext _localctx = new ValueContext(Context, State);
-		EnterRule(_localctx, 10, RULE_value);
+		EnterRule(_localctx, 20, RULE_value);
 		try {
-			State = 68;
+			State = 129;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,4,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,12,Context) ) {
 			case 1:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 60;
+				State = 121;
 				Match(BOOL);
 				}
 				break;
 			case 2:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 61;
+				State = 122;
 				Match(STRING);
 				}
 				break;
 			case 3:
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 62;
+				State = 123;
 				Match(NUMBER);
 				}
 				break;
 			case 4:
 				EnterOuterAlt(_localctx, 4);
 				{
-				State = 63;
+				State = 124;
 				list();
 				}
 				break;
 			case 5:
 				EnterOuterAlt(_localctx, 5);
 				{
-				State = 64;
+				State = 125;
 				map();
 				}
 				break;
 			case 6:
 				EnterOuterAlt(_localctx, 6);
 				{
-				State = 65;
+				State = 126;
 				reference();
 				}
 				break;
 			case 7:
 				EnterOuterAlt(_localctx, 7);
 				{
-				State = 66;
+				State = 127;
 				interpolation();
 				}
 				break;
 			case 8:
 				EnterOuterAlt(_localctx, 8);
 				{
-				State = 67;
+				State = 128;
 				functionCall();
 				}
 				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
-	public partial class ListContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ValueContext[] value() {
-			return GetRuleContexts<ValueContext>();
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value(int i) {
-			return GetRuleContext<ValueContext>(i);
-		}
-		public ListContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_list; } }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			IHclListener typedListener = listener as IHclListener;
-			if (typedListener != null) typedListener.EnterList(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			IHclListener typedListener = listener as IHclListener;
-			if (typedListener != null) typedListener.ExitList(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public ListContext list() {
-		ListContext _localctx = new ListContext(Context, State);
-		EnterRule(_localctx, 12, RULE_list);
-		int _la;
-		try {
-			EnterOuterAlt(_localctx, 1);
-			{
-			State = 70;
-			Match(T__3);
-			State = 79;
-			ErrorHandler.Sync(this);
-			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 30866L) != 0)) {
-				{
-				State = 71;
-				value();
-				State = 76;
-				ErrorHandler.Sync(this);
-				_la = TokenStream.LA(1);
-				while (_la==T__4) {
-					{
-					{
-					State = 72;
-					Match(T__4);
-					State = 73;
-					value();
-					}
-					}
-					State = 78;
-					ErrorHandler.Sync(this);
-					_la = TokenStream.LA(1);
-				}
-				}
-			}
-
-			State = 81;
-			Match(T__5);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
-	public partial class MapContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public MapEntryContext[] mapEntry() {
-			return GetRuleContexts<MapEntryContext>();
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public MapEntryContext mapEntry(int i) {
-			return GetRuleContext<MapEntryContext>(i);
-		}
-		public MapContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_map; } }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			IHclListener typedListener = listener as IHclListener;
-			if (typedListener != null) typedListener.EnterMap(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			IHclListener typedListener = listener as IHclListener;
-			if (typedListener != null) typedListener.ExitMap(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public MapContext map() {
-		MapContext _localctx = new MapContext(Context, State);
-		EnterRule(_localctx, 14, RULE_map);
-		int _la;
-		try {
-			EnterOuterAlt(_localctx, 1);
-			{
-			State = 83;
-			Match(T__0);
-			State = 92;
-			ErrorHandler.Sync(this);
-			_la = TokenStream.LA(1);
-			if (_la==STRING || _la==IDENTIFIER) {
-				{
-				State = 84;
-				mapEntry();
-				State = 89;
-				ErrorHandler.Sync(this);
-				_la = TokenStream.LA(1);
-				while (_la==T__4) {
-					{
-					{
-					State = 85;
-					Match(T__4);
-					State = 86;
-					mapEntry();
-					}
-					}
-					State = 91;
-					ErrorHandler.Sync(this);
-					_la = TokenStream.LA(1);
-				}
-				}
-			}
-
-			State = 94;
-			Match(T__1);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
-	public partial class MapEntryContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value() {
-			return GetRuleContext<ValueContext>(0);
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(HclParser.STRING, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(HclParser.IDENTIFIER, 0); }
-		public MapEntryContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_mapEntry; } }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			IHclListener typedListener = listener as IHclListener;
-			if (typedListener != null) typedListener.EnterMapEntry(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			IHclListener typedListener = listener as IHclListener;
-			if (typedListener != null) typedListener.ExitMapEntry(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public MapEntryContext mapEntry() {
-		MapEntryContext _localctx = new MapEntryContext(Context, State);
-		EnterRule(_localctx, 16, RULE_mapEntry);
-		int _la;
-		try {
-			EnterOuterAlt(_localctx, 1);
-			{
-			State = 96;
-			_la = TokenStream.LA(1);
-			if ( !(_la==STRING || _la==IDENTIFIER) ) {
-			ErrorHandler.RecoverInline(this);
-			}
-			else {
-				ErrorHandler.ReportMatch(this);
-			    Consume();
-			}
-			State = 97;
-			Match(T__2);
-			State = 98;
-			value();
 			}
 		}
 		catch (RecognitionException re) {
@@ -725,6 +938,7 @@ public partial class HclParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ExpressionContext expression() {
 			return GetRuleContext<ExpressionContext>(0);
 		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_BRACE() { return GetToken(HclParser.CLOSE_BRACE, 0); }
 		public InterpolationContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -745,16 +959,16 @@ public partial class HclParser : Parser {
 	[RuleVersion(0)]
 	public InterpolationContext interpolation() {
 		InterpolationContext _localctx = new InterpolationContext(Context, State);
-		EnterRule(_localctx, 18, RULE_interpolation);
+		EnterRule(_localctx, 22, RULE_interpolation);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 100;
-			Match(T__6);
-			State = 101;
+			State = 131;
+			Match(T__0);
+			State = 132;
 			expression();
-			State = 102;
-			Match(T__1);
+			State = 133;
+			Match(CLOSE_BRACE);
 			}
 		}
 		catch (RecognitionException re) {
@@ -793,26 +1007,26 @@ public partial class HclParser : Parser {
 	[RuleVersion(0)]
 	public ReferenceContext reference() {
 		ReferenceContext _localctx = new ReferenceContext(Context, State);
-		EnterRule(_localctx, 20, RULE_reference);
+		EnterRule(_localctx, 24, RULE_reference);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 104;
+			State = 135;
 			Match(IDENTIFIER);
-			State = 109;
+			State = 140;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while (_la==T__7) {
+			while (_la==T__1) {
 				{
 				{
-				State = 105;
-				Match(T__7);
-				State = 106;
+				State = 136;
+				Match(T__1);
+				State = 137;
 				Match(IDENTIFIER);
 				}
 				}
-				State = 111;
+				State = 142;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
@@ -831,11 +1045,17 @@ public partial class HclParser : Parser {
 
 	public partial class FunctionCallContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(HclParser.IDENTIFIER, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OPEN_PAREN() { return GetToken(HclParser.OPEN_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CLOSE_PAREN() { return GetToken(HclParser.CLOSE_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ValueContext[] value() {
 			return GetRuleContexts<ValueContext>();
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ValueContext value(int i) {
 			return GetRuleContext<ValueContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(HclParser.COMMA); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA(int i) {
+			return GetToken(HclParser.COMMA, i);
 		}
 		public FunctionCallContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -857,43 +1077,43 @@ public partial class HclParser : Parser {
 	[RuleVersion(0)]
 	public FunctionCallContext functionCall() {
 		FunctionCallContext _localctx = new FunctionCallContext(Context, State);
-		EnterRule(_localctx, 22, RULE_functionCall);
+		EnterRule(_localctx, 26, RULE_functionCall);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 112;
+			State = 143;
 			Match(IDENTIFIER);
-			State = 113;
-			Match(T__8);
-			State = 122;
+			State = 144;
+			Match(OPEN_PAREN);
+			State = 153;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 30866L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 5242L) != 0)) {
 				{
-				State = 114;
+				State = 145;
 				value();
-				State = 119;
+				State = 150;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				while (_la==T__4) {
+				while (_la==COMMA) {
 					{
 					{
-					State = 115;
-					Match(T__4);
-					State = 116;
+					State = 146;
+					Match(COMMA);
+					State = 147;
 					value();
 					}
 					}
-					State = 121;
+					State = 152;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
 				}
 			}
 
-			State = 124;
-			Match(T__9);
+			State = 155;
+			Match(CLOSE_PAREN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -937,29 +1157,29 @@ public partial class HclParser : Parser {
 	[RuleVersion(0)]
 	public ExpressionContext expression() {
 		ExpressionContext _localctx = new ExpressionContext(Context, State);
-		EnterRule(_localctx, 24, RULE_expression);
+		EnterRule(_localctx, 28, RULE_expression);
 		try {
-			State = 129;
+			State = 160;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,12,Context) ) {
+			switch ( Interpreter.AdaptivePredict(TokenStream,16,Context) ) {
 			case 1:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 126;
+				State = 157;
 				reference();
 				}
 				break;
 			case 2:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 127;
+				State = 158;
 				functionCall();
 				}
 				break;
 			case 3:
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 128;
+				State = 159;
 				value();
 				}
 				break;
@@ -977,46 +1197,57 @@ public partial class HclParser : Parser {
 	}
 
 	private static int[] _serializedATN = {
-		4,1,16,132,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
-		7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,1,0,5,0,28,8,0,10,0,
-		12,0,31,9,0,1,0,1,0,1,1,1,1,1,1,3,1,38,8,1,1,1,1,1,1,1,1,1,1,2,1,2,1,2,
-		5,2,47,8,2,10,2,12,2,50,9,2,1,3,1,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,5,1,
-		5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,69,8,5,1,6,1,6,1,6,1,6,5,6,75,8,6,10,6,12,
-		6,78,9,6,3,6,80,8,6,1,6,1,6,1,7,1,7,1,7,1,7,5,7,88,8,7,10,7,12,7,91,9,
-		7,3,7,93,8,7,1,7,1,7,1,8,1,8,1,8,1,8,1,9,1,9,1,9,1,9,1,10,1,10,1,10,5,
-		10,108,8,10,10,10,12,10,111,9,10,1,11,1,11,1,11,1,11,1,11,5,11,118,8,11,
-		10,11,12,11,121,9,11,3,11,123,8,11,1,11,1,11,1,12,1,12,1,12,3,12,130,8,
-		12,1,12,0,0,13,0,2,4,6,8,10,12,14,16,18,20,22,24,0,1,2,0,12,12,14,14,139,
-		0,29,1,0,0,0,2,34,1,0,0,0,4,48,1,0,0,0,6,51,1,0,0,0,8,55,1,0,0,0,10,68,
-		1,0,0,0,12,70,1,0,0,0,14,83,1,0,0,0,16,96,1,0,0,0,18,100,1,0,0,0,20,104,
-		1,0,0,0,22,112,1,0,0,0,24,129,1,0,0,0,26,28,3,2,1,0,27,26,1,0,0,0,28,31,
-		1,0,0,0,29,27,1,0,0,0,29,30,1,0,0,0,30,32,1,0,0,0,31,29,1,0,0,0,32,33,
-		5,0,0,1,33,1,1,0,0,0,34,35,5,14,0,0,35,37,5,12,0,0,36,38,5,12,0,0,37,36,
-		1,0,0,0,37,38,1,0,0,0,38,39,1,0,0,0,39,40,5,1,0,0,40,41,3,4,2,0,41,42,
-		5,2,0,0,42,3,1,0,0,0,43,47,3,6,3,0,44,47,3,8,4,0,45,47,5,15,0,0,46,43,
-		1,0,0,0,46,44,1,0,0,0,46,45,1,0,0,0,47,50,1,0,0,0,48,46,1,0,0,0,48,49,
-		1,0,0,0,49,5,1,0,0,0,50,48,1,0,0,0,51,52,5,14,0,0,52,53,5,3,0,0,53,54,
-		3,10,5,0,54,7,1,0,0,0,55,56,5,14,0,0,56,57,5,1,0,0,57,58,3,4,2,0,58,59,
-		5,2,0,0,59,9,1,0,0,0,60,69,5,11,0,0,61,69,5,12,0,0,62,69,5,13,0,0,63,69,
-		3,12,6,0,64,69,3,14,7,0,65,69,3,20,10,0,66,69,3,18,9,0,67,69,3,22,11,0,
-		68,60,1,0,0,0,68,61,1,0,0,0,68,62,1,0,0,0,68,63,1,0,0,0,68,64,1,0,0,0,
-		68,65,1,0,0,0,68,66,1,0,0,0,68,67,1,0,0,0,69,11,1,0,0,0,70,79,5,4,0,0,
-		71,76,3,10,5,0,72,73,5,5,0,0,73,75,3,10,5,0,74,72,1,0,0,0,75,78,1,0,0,
-		0,76,74,1,0,0,0,76,77,1,0,0,0,77,80,1,0,0,0,78,76,1,0,0,0,79,71,1,0,0,
-		0,79,80,1,0,0,0,80,81,1,0,0,0,81,82,5,6,0,0,82,13,1,0,0,0,83,92,5,1,0,
-		0,84,89,3,16,8,0,85,86,5,5,0,0,86,88,3,16,8,0,87,85,1,0,0,0,88,91,1,0,
-		0,0,89,87,1,0,0,0,89,90,1,0,0,0,90,93,1,0,0,0,91,89,1,0,0,0,92,84,1,0,
-		0,0,92,93,1,0,0,0,93,94,1,0,0,0,94,95,5,2,0,0,95,15,1,0,0,0,96,97,7,0,
-		0,0,97,98,5,3,0,0,98,99,3,10,5,0,99,17,1,0,0,0,100,101,5,7,0,0,101,102,
-		3,24,12,0,102,103,5,2,0,0,103,19,1,0,0,0,104,109,5,14,0,0,105,106,5,8,
-		0,0,106,108,5,14,0,0,107,105,1,0,0,0,108,111,1,0,0,0,109,107,1,0,0,0,109,
-		110,1,0,0,0,110,21,1,0,0,0,111,109,1,0,0,0,112,113,5,14,0,0,113,122,5,
-		9,0,0,114,119,3,10,5,0,115,116,5,5,0,0,116,118,3,10,5,0,117,115,1,0,0,
-		0,118,121,1,0,0,0,119,117,1,0,0,0,119,120,1,0,0,0,120,123,1,0,0,0,121,
-		119,1,0,0,0,122,114,1,0,0,0,122,123,1,0,0,0,123,124,1,0,0,0,124,125,5,
-		10,0,0,125,23,1,0,0,0,126,130,3,20,10,0,127,130,3,22,11,0,128,130,3,10,
-		5,0,129,126,1,0,0,0,129,127,1,0,0,0,129,128,1,0,0,0,130,25,1,0,0,0,13,
-		29,37,46,48,68,76,79,89,92,109,119,122,129
+		4,1,17,163,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,
+		1,0,5,0,32,8,0,10,0,12,0,35,9,0,1,0,1,0,1,1,1,1,1,1,3,1,42,8,1,1,1,1,1,
+		1,1,1,1,1,2,1,2,1,2,5,2,51,8,2,10,2,12,2,54,9,2,1,3,1,3,1,3,1,3,1,3,1,
+		3,1,3,1,3,1,3,1,3,3,3,66,8,3,1,4,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,
+		6,1,6,1,6,3,6,81,8,6,1,6,1,6,1,6,3,6,86,8,6,5,6,88,8,6,10,6,12,6,91,9,
+		6,1,6,1,6,1,7,1,7,1,7,5,7,98,8,7,10,7,12,7,101,9,7,1,7,3,7,104,8,7,5,7,
+		106,8,7,10,7,12,7,109,9,7,1,7,1,7,1,8,1,8,1,8,1,8,1,9,1,9,1,9,3,9,120,
+		8,9,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,3,10,130,8,10,1,11,1,11,1,
+		11,1,11,1,12,1,12,1,12,5,12,139,8,12,10,12,12,12,142,9,12,1,13,1,13,1,
+		13,1,13,1,13,5,13,149,8,13,10,13,12,13,152,9,13,3,13,154,8,13,1,13,1,13,
+		1,14,1,14,1,14,3,14,161,8,14,1,14,0,0,15,0,2,4,6,8,10,12,14,16,18,20,22,
+		24,26,28,0,1,1,0,16,17,174,0,33,1,0,0,0,2,38,1,0,0,0,4,52,1,0,0,0,6,65,
+		1,0,0,0,8,67,1,0,0,0,10,72,1,0,0,0,12,77,1,0,0,0,14,94,1,0,0,0,16,112,
+		1,0,0,0,18,119,1,0,0,0,20,129,1,0,0,0,22,131,1,0,0,0,24,135,1,0,0,0,26,
+		143,1,0,0,0,28,160,1,0,0,0,30,32,3,2,1,0,31,30,1,0,0,0,32,35,1,0,0,0,33,
+		31,1,0,0,0,33,34,1,0,0,0,34,36,1,0,0,0,35,33,1,0,0,0,36,37,5,0,0,1,37,
+		1,1,0,0,0,38,39,5,6,0,0,39,41,5,4,0,0,40,42,5,4,0,0,41,40,1,0,0,0,41,42,
+		1,0,0,0,42,43,1,0,0,0,43,44,5,10,0,0,44,45,3,4,2,0,45,46,5,11,0,0,46,3,
+		1,0,0,0,47,51,3,6,3,0,48,51,3,10,5,0,49,51,5,7,0,0,50,47,1,0,0,0,50,48,
+		1,0,0,0,50,49,1,0,0,0,51,54,1,0,0,0,52,50,1,0,0,0,52,53,1,0,0,0,53,5,1,
+		0,0,0,54,52,1,0,0,0,55,56,5,6,0,0,56,57,5,9,0,0,57,66,3,20,10,0,58,59,
+		5,6,0,0,59,60,5,9,0,0,60,66,3,14,7,0,61,62,3,8,4,0,62,63,5,9,0,0,63,64,
+		3,20,10,0,64,66,1,0,0,0,65,55,1,0,0,0,65,58,1,0,0,0,65,61,1,0,0,0,66,7,
+		1,0,0,0,67,68,5,6,0,0,68,69,5,12,0,0,69,70,5,4,0,0,70,71,5,13,0,0,71,9,
+		1,0,0,0,72,73,5,6,0,0,73,74,5,10,0,0,74,75,3,4,2,0,75,76,5,11,0,0,76,11,
+		1,0,0,0,77,80,5,12,0,0,78,81,3,20,10,0,79,81,3,8,4,0,80,78,1,0,0,0,80,
+		79,1,0,0,0,81,89,1,0,0,0,82,85,5,16,0,0,83,86,3,20,10,0,84,86,3,8,4,0,
+		85,83,1,0,0,0,85,84,1,0,0,0,86,88,1,0,0,0,87,82,1,0,0,0,88,91,1,0,0,0,
+		89,87,1,0,0,0,89,90,1,0,0,0,90,92,1,0,0,0,91,89,1,0,0,0,92,93,5,13,0,0,
+		93,13,1,0,0,0,94,107,5,10,0,0,95,99,3,16,8,0,96,98,7,0,0,0,97,96,1,0,0,
+		0,98,101,1,0,0,0,99,97,1,0,0,0,99,100,1,0,0,0,100,103,1,0,0,0,101,99,1,
+		0,0,0,102,104,3,16,8,0,103,102,1,0,0,0,103,104,1,0,0,0,104,106,1,0,0,0,
+		105,95,1,0,0,0,106,109,1,0,0,0,107,105,1,0,0,0,107,108,1,0,0,0,108,110,
+		1,0,0,0,109,107,1,0,0,0,110,111,5,11,0,0,111,15,1,0,0,0,112,113,3,18,9,
+		0,113,114,5,9,0,0,114,115,3,20,10,0,115,17,1,0,0,0,116,120,5,4,0,0,117,
+		120,5,6,0,0,118,120,3,8,4,0,119,116,1,0,0,0,119,117,1,0,0,0,119,118,1,
+		0,0,0,120,19,1,0,0,0,121,130,5,3,0,0,122,130,5,4,0,0,123,130,5,5,0,0,124,
+		130,3,12,6,0,125,130,3,14,7,0,126,130,3,24,12,0,127,130,3,22,11,0,128,
+		130,3,26,13,0,129,121,1,0,0,0,129,122,1,0,0,0,129,123,1,0,0,0,129,124,
+		1,0,0,0,129,125,1,0,0,0,129,126,1,0,0,0,129,127,1,0,0,0,129,128,1,0,0,
+		0,130,21,1,0,0,0,131,132,5,1,0,0,132,133,3,28,14,0,133,134,5,11,0,0,134,
+		23,1,0,0,0,135,140,5,6,0,0,136,137,5,2,0,0,137,139,5,6,0,0,138,136,1,0,
+		0,0,139,142,1,0,0,0,140,138,1,0,0,0,140,141,1,0,0,0,141,25,1,0,0,0,142,
+		140,1,0,0,0,143,144,5,6,0,0,144,153,5,14,0,0,145,150,3,20,10,0,146,147,
+		5,16,0,0,147,149,3,20,10,0,148,146,1,0,0,0,149,152,1,0,0,0,150,148,1,0,
+		0,0,150,151,1,0,0,0,151,154,1,0,0,0,152,150,1,0,0,0,153,145,1,0,0,0,153,
+		154,1,0,0,0,154,155,1,0,0,0,155,156,5,15,0,0,156,27,1,0,0,0,157,161,3,
+		24,12,0,158,161,3,26,13,0,159,161,3,20,10,0,160,157,1,0,0,0,160,158,1,
+		0,0,0,160,159,1,0,0,0,161,29,1,0,0,0,17,33,41,50,52,65,80,85,89,99,103,
+		107,119,129,140,150,153,160
 	};
 
 	public static readonly ATN _ATN =

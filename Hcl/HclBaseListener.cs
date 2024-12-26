@@ -84,6 +84,18 @@ public partial class HclBaseListener : IHclListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitAttribute([NotNull] HclParser.AttributeContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.nestedBlock"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -95,18 +107,6 @@ public partial class HclBaseListener : IHclListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitNestedBlock([NotNull] HclParser.NestedBlockContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="HclParser.value"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterValue([NotNull] HclParser.ValueContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="HclParser.value"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitValue([NotNull] HclParser.ValueContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.list"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -143,6 +143,30 @@ public partial class HclBaseListener : IHclListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitMapEntry([NotNull] HclParser.MapEntryContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.mapKey"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMapKey([NotNull] HclParser.MapKeyContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.mapKey"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMapKey([NotNull] HclParser.MapKeyContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.value"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterValue([NotNull] HclParser.ValueContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.value"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitValue([NotNull] HclParser.ValueContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.interpolation"/>.
 	/// <para>The default implementation does nothing.</para>
