@@ -229,17 +229,16 @@ namespace ModPosh.Hcl
             {
                 var child = context.GetChild(i);
 
-                if (child is ITerminalNode terminal && terminal.GetText() == ".")
+                if (child is ITerminalNode terminal)
                 {
-                    continue; // Skip adding additional dots
-                }
-                else if (child is ITerminalNode terminalNode)
-                {
-                    parts.Add(terminalNode.GetText());
+                    if (terminal.GetText() == "." || terminal.GetText() == "*")
+                    {
+                        parts.Add(terminal.GetText());
+                    }
                 }
                 else if (child is HclParser.IndexedReferenceContext indexedReference)
                 {
-                    var key = indexedReference.GetChild(2).GetText(); // Either STRING or NUMBER
+                    var key = indexedReference.GetChild(2).GetText(); // Either STRING, NUMBER, or '*'
                     parts.Add($"[{key}]");
 
                     // Handle additional properties after indexed references

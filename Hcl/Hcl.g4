@@ -50,14 +50,11 @@ value: BOOL
 interpolation: '${' expression '}' ;
 
 // References: `module.resource.property` or similar
-// reference: IDENTIFIER ('.' IDENTIFIER | '.' IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET)* ;
-// reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' indexedReference)* ;
-reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' IDENTIFIER OPEN_BRACKET NUMBER CLOSE_BRACKET)* ;
-//reference: IDENTIFIER ('.' IDENTIFIER | indexedReference)* ;
+// reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' IDENTIFIER OPEN_BRACKET (NUMBER | STRING | '*') CLOSE_BRACKET)* ;
+reference: IDENTIFIER ('.' IDENTIFIER | '.' '*' | '.' IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET)* ;
 
 // Indexed references: `resource["key"]`
-// indexedReference: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ('.' IDENTIFIER)* ;
-indexedReference: IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET ('.' IDENTIFIER)* ;
+indexedReference: IDENTIFIER OPEN_BRACKET (STRING | NUMBER | '*') CLOSE_BRACKET ('.' IDENTIFIER)* ;
 
 // Function calls: `function(args...)`
 functionCall: IDENTIFIER OPEN_PAREN (value (',' value)*)? CLOSE_PAREN ;
