@@ -4,6 +4,7 @@ using ModPosh.Hcl.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Antlr4.Runtime.Tree;
 
 namespace ModPosh.Hcl
 {
@@ -207,6 +208,8 @@ namespace ModPosh.Hcl
                 return VisitReference(context.reference());
             if (context.interpolation() != null)
                 return VisitInterpolation(context.interpolation());
+            //if (context.functionCall() != null)
+            //    return VisitFunctionCall(context.functionCall());
             return null;
         }
 
@@ -223,7 +226,37 @@ namespace ModPosh.Hcl
         /// </summary>
         private string VisitReference(HclParser.ReferenceContext context)
         {
-            return string.Join(".", context.IDENTIFIER().Select(id => id.GetText()));
+            var parts = new List<string>();
+
+            // Add the first IDENTIFIER
+            parts.Add(context.IDENTIFIER(0).GetText());
+
+            // Traverse the remaining parts of the reference
+            for (int i = 1; i < context.ChildCount; i++)
+            {
+                var child = context.GetChild(i);
+
+                if (child is ITerminalNode terminal)
+                {
+                    parts.Add(terminal.GetText());
+                }
+                else if (child is HclParser.IndexedReferenceContext indexedReference)
+                {
+                    var key = indexedReference.STRING().GetText();
+                    parts.Add($"[{key}]");
+                }
+            }
+
+            return string.Join(".", parts);
+        }
+
+        private string VisitIndexedReference(HclParser.IndexedReferenceContext context)
+        {
+            var key = context.STRING().GetText().Trim('"');
+            var parent = string.Join(".", context.IDENTIFIER().Select(id => id.GetText()));
+            var additional = context.IDENTIFIER().Select(id => id.GetText());
+
+            return $"{parent}[\"{key}\"]" + (additional.Any() ? $".{string.Join(".", additional)}" : string.Empty);
         }
 
         /// <summary>

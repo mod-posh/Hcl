@@ -192,6 +192,18 @@ public partial class HclBaseListener : IHclListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitReference([NotNull] HclParser.ReferenceContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.indexedReference"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterIndexedReference([NotNull] HclParser.IndexedReferenceContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.indexedReference"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitIndexedReference([NotNull] HclParser.IndexedReferenceContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.functionCall"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

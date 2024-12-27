@@ -9,7 +9,7 @@ block: IDENTIFIER STRING STRING? OPEN_BRACE body CLOSE_BRACE ;
 // The body of a block, allowing attributes, nested blocks, or comments
 body: (attribute | nestedBlock | COMMENT)* ;
 
-// Updated attribute to distinguish between simple, indexed, and map values
+// Attribute to distinguish between simple, indexed, and map values
 attribute: IDENTIFIER EQUAL value
          | IDENTIFIER EQUAL map
          | indexedAttribute EQUAL value ;
@@ -21,16 +21,18 @@ indexedAttribute: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ;
 nestedBlock: IDENTIFIER OPEN_BRACE body CLOSE_BRACE ;
 
 // Lists: Sequences of values enclosed in `[ ]`
-list: OPEN_BRACKET (value | indexedAttribute) (COMMA (value | indexedAttribute))* CLOSE_BRACKET ;
+list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
 
 // Map: Key-value pairs enclosed in `{ }`, separated by commas or newlines
-map: OPEN_BRACE (mapEntry (COMMA | NEWLINE)* mapEntry?)* CLOSE_BRACE;
+// map: OPEN_BRACE ((mapEntry (COMMA | NEWLINE)* mapEntry?)*)? CLOSE_BRACE ;
+map: OPEN_BRACE (mapEntry (COMMA | NEWLINE)* )* CLOSE_BRACE ;
+
 
 // Map Entry: A key-value pair
 mapEntry: mapKey EQUAL value ;
 
-// Map Key: Supports identifiers, strings, and indexed attributes
-mapKey: STRING | IDENTIFIER | indexedAttribute ;
+// Map Key: Supports identifiers, strings, indexed attributes, and references
+mapKey: STRING | IDENTIFIER | indexedAttribute | reference ;
 
 // Values: Can be booleans, strings, numbers, lists, maps, references, interpolations, or function calls
 value: BOOL
@@ -39,6 +41,7 @@ value: BOOL
      | list
      | map
      | reference
+     | indexedReference
      | interpolation
      | functionCall ;
 
@@ -46,7 +49,12 @@ value: BOOL
 interpolation: '${' expression '}' ;
 
 // References: `module.resource.property` or similar
-reference: IDENTIFIER ('.' IDENTIFIER)* ;
+// reference: IDENTIFIER ('.' IDENTIFIER)* ;
+reference: IDENTIFIER ('.' IDENTIFIER | '.' IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET)* ;
+
+
+// Indexed references: `resource["key"]`
+indexedReference: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ('.' IDENTIFIER)* ;
 
 // Function calls: `function(args...)`
 functionCall: IDENTIFIER OPEN_PAREN (value (',' value)*)? CLOSE_PAREN ;

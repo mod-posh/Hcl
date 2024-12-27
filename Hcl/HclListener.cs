@@ -161,6 +161,16 @@ public interface IHclListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitReference([NotNull] HclParser.ReferenceContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.indexedReference"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterIndexedReference([NotNull] HclParser.IndexedReferenceContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.indexedReference"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitIndexedReference([NotNull] HclParser.IndexedReferenceContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.functionCall"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
