@@ -3,8 +3,8 @@ grammar Hcl;
 // Entry point for the HCL file, allowing any number of blocks
 document: block* EOF ;
 
-// Definition of a block (module, resource, or data block)
-block: IDENTIFIER STRING STRING? OPEN_BRACE body CLOSE_BRACE ;
+// Definition of a block (module, resource, provider, or Terraform settings)
+block: IDENTIFIER STRING? STRING? OPEN_BRACE body CLOSE_BRACE ;
 
 // The body of a block, allowing attributes, nested blocks, or comments
 body: (attribute | nestedBlock | COMMENT)* ;
@@ -17,16 +17,15 @@ attribute: IDENTIFIER EQUAL value
 // Indexed attributes for keys like `metadata["key"]`
 indexedAttribute: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ;
 
-// Nested blocks, e.g., `managed { ... }`
+// Nested blocks, e.g., `required_providers { ... }`
 nestedBlock: IDENTIFIER OPEN_BRACE body CLOSE_BRACE ;
 
 // Lists: Sequences of values enclosed in `[ ]`
-list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
+// list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
+list: OPEN_BRACKET ((value | reference | indexedAttribute | indexedReference) (COMMA (value | reference | indexedAttribute | indexedReference))*)? CLOSE_BRACKET ;
 
 // Map: Key-value pairs enclosed in `{ }`, separated by commas or newlines
-// map: OPEN_BRACE ((mapEntry (COMMA | NEWLINE)* mapEntry?)*)? CLOSE_BRACE ;
 map: OPEN_BRACE (mapEntry (COMMA | NEWLINE)* )* CLOSE_BRACE ;
-
 
 // Map Entry: A key-value pair
 mapEntry: mapKey EQUAL value ;
@@ -49,8 +48,8 @@ value: BOOL
 interpolation: '${' expression '}' ;
 
 // References: `module.resource.property` or similar
-// reference: IDENTIFIER ('.' IDENTIFIER)* ;
-reference: IDENTIFIER ('.' IDENTIFIER | '.' IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET)* ;
+// reference: IDENTIFIER ('.' IDENTIFIER | '.' IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET)* ;
+reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' indexedReference)* ;
 
 
 // Indexed references: `resource["key"]`

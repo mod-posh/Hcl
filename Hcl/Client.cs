@@ -116,12 +116,17 @@ namespace ModPosh.Hcl
         /// </summary>
         private Dictionary<string, object?> VisitBlock(HclParser.BlockContext context)
         {
+            var blockType = context.IDENTIFIER().GetText();
+            var blockName = context.STRING(0)?.GetText()?.Trim('"');
+            var optionalLabel = context.STRING(1)?.GetText()?.Trim('"');
+
+            var body = VisitBody(context.body());
             return new Dictionary<string, object?>
             {
-                ["type"] = context.IDENTIFIER().GetText(),
-                ["name"] = context.STRING(0).GetText().Trim('"'),
-                ["optionalLabel"] = context.STRING(1)?.GetText()?.Trim('"'),
-                ["body"] = VisitBody(context.body())
+                ["type"] = blockType,
+                ["name"] = blockName,
+                ["optionalLabel"] = optionalLabel,
+                ["body"] = body
             };
         }
 
@@ -134,28 +139,17 @@ namespace ModPosh.Hcl
 
             foreach (var element in context.children)
             {
-                if (element is HclParser.AttributeContext attr)
+                switch (element)
                 {
-                    if (attr.indexedAttribute() != null)
-                    {
-                        var indexedAttr = attr.indexedAttribute();
-                        var parentKey = indexedAttr.IDENTIFIER().GetText();
-                        var indexKey = indexedAttr.STRING().GetText().Trim('"');
-                        var fullKey = $"{parentKey}[\"{indexKey}\"]";
-                        bodyData[fullKey] = VisitValue(attr.value());
-                    }
-                    else
-                    {
+                    case HclParser.AttributeContext attr:
                         bodyData[attr.IDENTIFIER().GetText()] = VisitValue(attr.value());
-                    }
-                }
-                else if (element is HclParser.NestedBlockContext nested)
-                {
-                    bodyData[nested.IDENTIFIER().GetText()] = VisitBody(nested.body());
-                }
-                // Ignore comments and newlines
-            }
+                        break;
 
+                    case HclParser.NestedBlockContext nested:
+                        bodyData[nested.IDENTIFIER().GetText()] = VisitBody(nested.body());
+                        break;
+                }
+            }
             return bodyData;
         }
 
@@ -169,21 +163,22 @@ namespace ModPosh.Hcl
 
             if (context?.mapEntry() == null)
             {
-                // Handle empty maps gracefully
-                return map;
+                throw new Exception("Map context or entries are null.");
             }
 
             foreach (var entry in context.mapEntry())
             {
-                var key = entry.mapKey().STRING()?.GetText()?.Trim('"')
-                         ?? entry.mapKey().IDENTIFIER()?.GetText();
+                var key = entry.mapKey().STRING()?.GetText()?.Trim('"') ??
+                          entry.mapKey().IDENTIFIER()?.GetText();
 
-                if (key == null)
+                if (key != null)
                 {
-                    throw new Exception($"Invalid or missing key in map entry: {entry.GetText()}");
+                    map[key] = VisitValue(entry.value());
                 }
-
-                map[key] = VisitValue(entry.value());
+                else
+                {
+                    throw new Exception($"Invalid key in map: {entry.GetText()}");
+                }
             }
 
             return map;
@@ -231,19 +226,22 @@ namespace ModPosh.Hcl
             // Add the first IDENTIFIER
             parts.Add(context.IDENTIFIER(0).GetText());
 
-            // Traverse the remaining parts of the reference
+            // Traverse remaining children
             for (int i = 1; i < context.ChildCount; i++)
             {
                 var child = context.GetChild(i);
-
                 if (child is ITerminalNode terminal)
                 {
                     parts.Add(terminal.GetText());
                 }
-                else if (child is HclParser.IndexedReferenceContext indexedReference)
+                else if (child is HclParser.IndexedAttributeContext indexedAttr)
                 {
-                    var key = indexedReference.STRING().GetText();
+                    var key = indexedAttr.STRING().GetText().Trim('"');
                     parts.Add($"[{key}]");
+                }
+                else if (child is HclParser.IndexedReferenceContext indexedRef)
+                {
+                    parts.Add(VisitIndexedReference(indexedRef));
                 }
             }
 
