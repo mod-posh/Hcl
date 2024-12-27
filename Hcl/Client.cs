@@ -129,29 +129,25 @@ namespace ModPosh.Hcl
         /// </summary>
         private Dictionary<string, object?> VisitBlock(HclParser.BlockContext context)
         {
-            try
-            {
-                var blockType = context.IDENTIFIER().GetText();
-                var blockName = context.STRING(0)?.GetText()?.Trim('"');
-                var optionalLabel = context.STRING(1)?.GetText()?.Trim('"');
+            var blockType = context.IDENTIFIER().GetText();
 
-                // Handle the body gracefully
-                var bodyContext = context.body();
-                var body = bodyContext != null ? VisitBody(bodyContext) : new Dictionary<string, object?>();
+            // Collect block labels from the blockLabel rule
+            var blockLabels = context.blockLabel()?.children
+                .Select(label => label.GetText().Trim('"')) // Trim quotes if STRING
+                .ToList();
 
-                return new Dictionary<string, object?>
-                {
-                    ["type"] = blockType,
-                    ["name"] = blockName,
-                    ["optionalLabel"] = optionalLabel,
-                    ["body"] = body
-                };
-            }
-            catch (Exception ex)
+            // Determine the primary name and optional label
+            var blockName = blockLabels != null && blockLabels.Count > 0 ? blockLabels[0] : null;
+            var optionalLabel = blockLabels != null && blockLabels.Count > 1 ? blockLabels[1] : null;
+
+            var body = VisitBody(context.body());
+            return new Dictionary<string, object?>
             {
-                Console.WriteLine($"Error visiting block: {context.GetText()} - {ex.Message}");
-                throw;
-            }
+                ["type"] = blockType,
+                ["name"] = blockName,
+                ["optionalLabel"] = optionalLabel,
+                ["body"] = body
+            };
         }
 
         /// <summary>

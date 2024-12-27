@@ -51,6 +51,16 @@ public interface IHclListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitBlock([NotNull] HclParser.BlockContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.blockLabel"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterBlockLabel([NotNull] HclParser.BlockLabelContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.blockLabel"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitBlockLabel([NotNull] HclParser.BlockLabelContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.body"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -71,16 +81,6 @@ public interface IHclListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitAttribute([NotNull] HclParser.AttributeContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.nestedBlock"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -90,6 +90,16 @@ public interface IHclListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitNestedBlock([NotNull] HclParser.NestedBlockContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.list"/>.
 	/// </summary>

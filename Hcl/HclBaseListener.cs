@@ -60,6 +60,18 @@ public partial class HclBaseListener : IHclListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitBlock([NotNull] HclParser.BlockContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.blockLabel"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterBlockLabel([NotNull] HclParser.BlockLabelContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.blockLabel"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitBlockLabel([NotNull] HclParser.BlockLabelContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.body"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -84,18 +96,6 @@ public partial class HclBaseListener : IHclListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitAttribute([NotNull] HclParser.AttributeContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context) { }
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.nestedBlock"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -107,6 +107,18 @@ public partial class HclBaseListener : IHclListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitNestedBlock([NotNull] HclParser.NestedBlockContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.indexedAttribute"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitIndexedAttribute([NotNull] HclParser.IndexedAttributeContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.list"/>.
 	/// <para>The default implementation does nothing.</para>

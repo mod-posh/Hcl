@@ -1,32 +1,28 @@
 grammar Hcl;
 
-// Entry point for the HCL file, allowing any number of blocks
+// Entry point for the HCL file
 document: block* EOF ;
 
-// Definition of a block (module, resource, provider, or Terraform settings)
-block: IDENTIFIER STRING? STRING? OPEN_BRACE body CLOSE_BRACE ;
+// Definition of a block
+block: IDENTIFIER blockLabel? OPEN_BRACE body CLOSE_BRACE ;
+
+// Block label: Supports optional strings (e.g., `backend "azurerm"`)
+blockLabel: STRING+ ;
 
 // The body of a block, allowing attributes, nested blocks, or comments
-body: (attribute | nestedBlock | COMMENT)* ;
+body: (attribute | nestedBlock | COMMENT | NEWLINE)* ;
 
-// Attribute to distinguish between simple, indexed, and map values
-attribute: IDENTIFIER EQUAL value
-         | IDENTIFIER EQUAL map
-         | indexedAttribute EQUAL value ;
+// Attributes for key-value pairs
+attribute: IDENTIFIER EQUAL value ;
+
+// Nested blocks (e.g., `required_providers { ... }`)
+nestedBlock: IDENTIFIER blockLabel? OPEN_BRACE body CLOSE_BRACE ;
 
 // Indexed attributes for keys like `metadata["key"]`
 indexedAttribute: IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET ;
 
-// Port range: A number followed by a '-' and another number (e.g., `443-445`)
-PORT_RANGE: NUMBER '-' NUMBER;
-
-// Nested blocks, e.g., `required_providers { ... }`
-nestedBlock: IDENTIFIER OPEN_BRACE body CLOSE_BRACE ;
-
 // Lists: Sequences of values enclosed in `[ ]`
-// list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
-// list: OPEN_BRACKET ((value | reference | indexedAttribute | indexedReference) (COMMA (value | reference | indexedAttribute | indexedReference))*)? CLOSE_BRACKET ;
-list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference | PORT_RANGE) (COMMA (value | indexedAttribute | reference | indexedReference | PORT_RANGE))*)? CLOSE_BRACKET ;
+list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
 
 // Map: Key-value pairs enclosed in `{ }`, separated by commas or newlines
 map: OPEN_BRACE (mapEntry (COMMA | NEWLINE)* )* CLOSE_BRACE ;
@@ -41,7 +37,6 @@ mapKey: STRING | IDENTIFIER | indexedAttribute | reference ;
 value: BOOL
      | STRING
      | NUMBER
-     | PORT_RANGE
      | list
      | map
      | reference
@@ -53,7 +48,6 @@ value: BOOL
 interpolation: '${' expression '}' ;
 
 // References: `module.resource.property` or similar
-// reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' IDENTIFIER OPEN_BRACKET (NUMBER | STRING | '*') CLOSE_BRACKET)* ;
 reference: IDENTIFIER ('.' IDENTIFIER | '.' '*' | '.' IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET)* ;
 
 // Indexed references: `resource["key"]`
