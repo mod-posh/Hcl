@@ -15,7 +15,9 @@ attribute: IDENTIFIER EQUAL value
          | indexedAttribute EQUAL value ;
 
 // Indexed attributes for keys like `metadata["key"]`
-indexedAttribute: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ;
+// indexedAttribute: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ;
+indexedAttribute: IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET ;
+
 
 // Nested blocks, e.g., `required_providers { ... }`
 nestedBlock: IDENTIFIER OPEN_BRACE body CLOSE_BRACE ;
@@ -49,11 +51,13 @@ interpolation: '${' expression '}' ;
 
 // References: `module.resource.property` or similar
 // reference: IDENTIFIER ('.' IDENTIFIER | '.' IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET)* ;
-reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' indexedReference)* ;
-
+// reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' indexedReference)* ;
+reference: IDENTIFIER ('.' IDENTIFIER | '.' indexedAttribute | '.' IDENTIFIER OPEN_BRACKET NUMBER CLOSE_BRACKET)* ;
+//reference: IDENTIFIER ('.' IDENTIFIER | indexedReference)* ;
 
 // Indexed references: `resource["key"]`
-indexedReference: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ('.' IDENTIFIER)* ;
+// indexedReference: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ('.' IDENTIFIER)* ;
+indexedReference: IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET ('.' IDENTIFIER)* ;
 
 // Function calls: `function(args...)`
 functionCall: IDENTIFIER OPEN_PAREN (value (',' value)*)? CLOSE_PAREN ;

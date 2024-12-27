@@ -226,22 +226,28 @@ namespace ModPosh.Hcl
             // Add the first IDENTIFIER
             parts.Add(context.IDENTIFIER(0).GetText());
 
-            // Traverse remaining children
+            // Traverse the remaining parts of the reference
             for (int i = 1; i < context.ChildCount; i++)
             {
                 var child = context.GetChild(i);
+
                 if (child is ITerminalNode terminal)
                 {
                     parts.Add(terminal.GetText());
                 }
-                else if (child is HclParser.IndexedAttributeContext indexedAttr)
+                else if (child is HclParser.IndexedReferenceContext indexedReference)
                 {
-                    var key = indexedAttr.STRING().GetText().Trim('"');
+                    var key = indexedReference.GetChild(2).GetText(); // Either STRING or NUMBER
                     parts.Add($"[{key}]");
-                }
-                else if (child is HclParser.IndexedReferenceContext indexedRef)
-                {
-                    parts.Add(VisitIndexedReference(indexedRef));
+
+                    // Handle additional properties after indexed references
+                    if (indexedReference.ChildCount > 4)
+                    {
+                        for (int j = 4; j < indexedReference.ChildCount; j += 2)
+                        {
+                            parts.Add(indexedReference.GetChild(j).GetText());
+                        }
+                    }
                 }
             }
 
