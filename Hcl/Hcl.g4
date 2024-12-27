@@ -1,42 +1,43 @@
 grammar Hcl;
 
-// Entry point for the HCL file, which can contain multiple blocks
+// Entry point for the HCL file
 document: block* EOF ;
 
-// Definition of a block, which is the fundamental structure in HCL
+// Definition of a block
 block: IDENTIFIER blockLabel? OPEN_BRACE body CLOSE_BRACE ;
 
-// Block label: Defines optional labels for blocks (e.g., `backend "azurerm"`)
+// Block label: Supports optional strings (e.g., `backend "azurerm"`)
 blockLabel: STRING+ ;
 
-// The body of a block, which can include attributes, nested blocks, comments, or newlines
+// The body of a block, allowing attributes, nested blocks, or comments
 body: (attribute | nestedBlock | COMMENT | NEWLINE)* ;
 
-// Attributes: Define key-value pairs or assignments (e.g., `key = value`)
+// Attributes for key-value pairs
 attribute: IDENTIFIER EQUAL value ;
 
-// Nested blocks: Define nested structures within a block (e.g., `provider { ... }`)
+// Nested blocks (e.g., `required_providers { ... }`)
 nestedBlock: IDENTIFIER blockLabel? OPEN_BRACE body CLOSE_BRACE ;
 
-// Indexed attributes: Define indexed keys like `metadata["key"]`
+// Indexed attributes for keys like `metadata["key"]`
 indexedAttribute: IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET ;
 
-// Lists: Define sequences of values enclosed in square brackets (e.g., `[1, 2, 3]`)
-list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
+// Lists: Sequences of values enclosed in `[ ]`
+list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference | PORT_RANGE) (COMMA (value | indexedAttribute | reference | indexedReference | PORT_RANGE))*)? CLOSE_BRACKET ;
 
-// Map: Define key-value pairs enclosed in curly braces (e.g., `{ key = value }`)
+// Map: Key-value pairs enclosed in `{ }`, separated by commas or newlines
 map: OPEN_BRACE (mapEntry (COMMA | NEWLINE)* )* CLOSE_BRACE ;
 
-// Map Entry: Represents a single key-value pair in a map
+// Map Entry: A key-value pair
 mapEntry: mapKey EQUAL value ;
 
-// Map Key: Keys in a map, which can be strings, identifiers, or references
+// Map Key: Supports identifiers, strings, indexed attributes, and references
 mapKey: STRING | IDENTIFIER | indexedAttribute | reference ;
 
-// Values: The possible types of values in HCL (e.g., booleans, strings, lists, maps)
+// Values: Can be booleans, strings, numbers, lists, maps, references, interpolations, or function calls
 value: BOOL
      | STRING
      | NUMBER
+     | PORT_RANGE
      | list
      | map
      | reference
@@ -44,19 +45,19 @@ value: BOOL
      | interpolation
      | functionCall ;
 
-// Interpolations: Expressions enclosed in `${}` (e.g., `${var.value}`)
+// Interpolations: `${expression}`
 interpolation: '${' expression '}' ;
 
-// References: Allow dot notation for accessing properties (e.g., `module.resource.property`)
+// References: `module.resource.property` or similar
 reference: IDENTIFIER ('.' IDENTIFIER | '.' '*' | '.' IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET)* ;
 
-// Indexed References: Allow accessing elements with a key or index (e.g., `resource["key"]`)
+// Indexed references: `resource["key"]`
 indexedReference: IDENTIFIER OPEN_BRACKET (STRING | NUMBER | '*') CLOSE_BRACKET ('.' IDENTIFIER)* ;
 
-// Function Calls: Allow invoking functions with arguments (e.g., `function(arg1, arg2)`)
+// Function calls: `function(args...)`
 functionCall: IDENTIFIER OPEN_PAREN (value (',' value)*)? CLOSE_PAREN ;
 
-// Expressions within interpolations: Can be references, function calls, or values
+// Expressions within interpolations
 expression: reference
           | functionCall
           | value ;
@@ -66,28 +67,31 @@ expression: reference
 // Boolean values (`true` or `false`)
 BOOL: 'true' | 'false' ;
 
-// Strings: Support special characters and escape sequences (e.g., `"string"`)
+// Strings, supporting special characters and escape sequences
 STRING: '"' (~["\\] | '\\' .)* '"' ;
 
-// Numbers: Integers or floats (e.g., `123`, `45.67`)
+// Numbers (integers or floats)
 NUMBER: [0-9]+ ('.' [0-9]+)? ;
 
-// Identifiers: Used for keys, resource types, etc. (e.g., `my_variable`)
+// Port range: A number followed by a '-' and another number (e.g., `443-445`)
+PORT_RANGE: [0-9]+ '-' [0-9]+ ;
+
+// Identifiers (used for keys, resource types, etc.)
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_-]* ;
 
-// Comments: Lines starting with `#`
+// Comments (`# ...`)
 COMMENT: '#' ~[\r\n]* -> skip ;
 
 // Skip whitespace
 WHITESPACE: [ \t\r\n]+ -> skip ;
 
 // Symbols
-EQUAL: '=' ;          // Equal sign for assignments
-OPEN_BRACE: '{' ;     // Open curly brace for block bodies or maps
-CLOSE_BRACE: '}' ;    // Close curly brace
-OPEN_BRACKET: '[' ;   // Open square bracket for lists or indexed attributes
-CLOSE_BRACKET: ']' ;  // Close square bracket
-OPEN_PAREN: '(' ;     // Open parenthesis for function calls
-CLOSE_PAREN: ')' ;    // Close parenthesis
-COMMA: ',' ;          // Comma for separating list or map elements
-NEWLINE: [\r\n]+ -> skip ; // Skip newlines
+EQUAL: '=' ;
+OPEN_BRACE: '{' ;
+CLOSE_BRACE: '}' ;
+OPEN_BRACKET: '[' ;
+CLOSE_BRACKET: ']' ;
+OPEN_PAREN: '(' ;
+CLOSE_PAREN: ')' ;
+COMMA: ',' ;
+NEWLINE: [\r\n]+ -> skip ;
