@@ -203,8 +203,6 @@ namespace ModPosh.Hcl
                 return VisitReference(context.reference());
             if (context.interpolation() != null)
                 return VisitInterpolation(context.interpolation());
-            //if (context.functionCall() != null)
-            //    return VisitFunctionCall(context.functionCall());
             return null;
         }
 
@@ -231,9 +229,13 @@ namespace ModPosh.Hcl
             {
                 var child = context.GetChild(i);
 
-                if (child is ITerminalNode terminal)
+                if (child is ITerminalNode terminal && terminal.GetText() == ".")
                 {
-                    parts.Add(terminal.GetText());
+                    continue; // Skip adding additional dots
+                }
+                else if (child is ITerminalNode terminalNode)
+                {
+                    parts.Add(terminalNode.GetText());
                 }
                 else if (child is HclParser.IndexedReferenceContext indexedReference)
                 {
