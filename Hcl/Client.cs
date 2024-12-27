@@ -137,24 +137,26 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Processes a block context to extract its type, name, optional labels, and body.
+        /// Visits a block and extracts its type, name, optional label, and body.
         /// </summary>
         /// <param name="context">The block context from the HCL parser.</param>
-        /// <returns>
-        /// A dictionary containing the block type, name, optional label, and body as key-value pairs.
-        /// </returns>
+        /// <returns>A dictionary representing the block's parsed structure.</returns>
         private Dictionary<string, object?> VisitBlock(HclParser.BlockContext context)
         {
             var blockType = context.IDENTIFIER().GetText();
 
+            // Collect block labels from the blockLabel rule
             var blockLabels = context.blockLabel()?.children
-                .Select(label => label.GetText().Trim('"')) // Trim quotes for string labels
+                .Select(label => label.GetText().Trim('"')) // Trim quotes if STRING
                 .ToList();
 
+            // Determine the primary name and optional label
             var blockName = blockLabels != null && blockLabels.Count > 0 ? blockLabels[0] : null;
             var optionalLabel = blockLabels != null && blockLabels.Count > 1 ? blockLabels[1] : null;
 
-            var body = VisitBody(context.body());
+            // Check if the block has a body
+            var body = context.body() != null ? VisitBody(context.body()) : new Dictionary<string, object?>();
+
             return new Dictionary<string, object?>
             {
                 ["type"] = blockType,
@@ -165,12 +167,18 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Processes the body of a block to extract attributes, nested blocks, and other elements.
+        /// Visits the body of a block and extracts attributes, nested blocks, and handles comments/newlines.
         /// </summary>
         /// <param name="context">The body context from the HCL parser.</param>
-        /// <returns>A dictionary containing the attributes and nested blocks in the body.</returns>
+        /// <returns>A dictionary representing the body's parsed structure.</returns>
         private Dictionary<string, object?> VisitBody(HclParser.BodyContext context)
         {
+            if (context == null || context.children == null || context.children.Count == 0)
+            {
+                // Return an empty dictionary for empty or null body contexts
+                return new Dictionary<string, object?>();
+            }
+
             var bodyData = new Dictionary<string, object?>();
 
             foreach (var element in context.children)
