@@ -368,19 +368,51 @@ namespace ModPosh.Hcl
         /// <returns>The textual representation of the reference.</returns>
         private string VisitReference(HclParser.ReferenceContext context)
         {
-            var parts = new List<string> { context.IDENTIFIER(0).GetText() };
+            var parts = new List<string>();
 
+            // Add the first IDENTIFIER
+            parts.Add(context.IDENTIFIER(0).GetText());
+
+            // Traverse the remaining parts of the reference
             for (int i = 1; i < context.ChildCount; i++)
             {
                 var child = context.GetChild(i);
 
                 if (child is ITerminalNode terminal)
                 {
-                    parts.Add(terminal.GetText());
+                    // Handle '.' and '*' correctly
+                    var text = terminal.GetText();
+                    if (text == ".")
+                    {
+                        // Avoid adding consecutive dots
+                        if (parts.LastOrDefault() != ".")
+                        {
+                            parts.Add(text);
+                        }
+                    }
+                    else if (text == "*")
+                    {
+                        parts.Add(text);
+                    }
+                }
+                else if (child is HclParser.IndexedReferenceContext indexedReference)
+                {
+                    var key = indexedReference.GetChild(2).GetText(); // Either STRING, NUMBER, or '*'
+                    parts.Add($"[{key}]");
+
+                    // Handle additional properties after indexed references
+                    if (indexedReference.ChildCount > 4)
+                    {
+                        for (int j = 4; j < indexedReference.ChildCount; j += 2)
+                        {
+                            parts.Add(indexedReference.GetChild(j).GetText());
+                        }
+                    }
                 }
             }
 
-            return string.Join(".", parts);
+            // Join parts without introducing extra periods
+            return string.Join("", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
         }
 
         /// <summary>
