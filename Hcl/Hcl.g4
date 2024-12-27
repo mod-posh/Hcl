@@ -15,16 +15,18 @@ attribute: IDENTIFIER EQUAL value
          | indexedAttribute EQUAL value ;
 
 // Indexed attributes for keys like `metadata["key"]`
-// indexedAttribute: IDENTIFIER OPEN_BRACKET STRING CLOSE_BRACKET ;
 indexedAttribute: IDENTIFIER OPEN_BRACKET (STRING | NUMBER) CLOSE_BRACKET ;
 
+// Port range: A number followed by a '-' and another number (e.g., `443-445`)
+PORT_RANGE: NUMBER '-' NUMBER;
 
 // Nested blocks, e.g., `required_providers { ... }`
 nestedBlock: IDENTIFIER OPEN_BRACE body CLOSE_BRACE ;
 
 // Lists: Sequences of values enclosed in `[ ]`
 // list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference) (COMMA (value | indexedAttribute | reference | indexedReference))*)? CLOSE_BRACKET ;
-list: OPEN_BRACKET ((value | reference | indexedAttribute | indexedReference) (COMMA (value | reference | indexedAttribute | indexedReference))*)? CLOSE_BRACKET ;
+// list: OPEN_BRACKET ((value | reference | indexedAttribute | indexedReference) (COMMA (value | reference | indexedAttribute | indexedReference))*)? CLOSE_BRACKET ;
+list: OPEN_BRACKET ((value | indexedAttribute | reference | indexedReference | PORT_RANGE) (COMMA (value | indexedAttribute | reference | indexedReference | PORT_RANGE))*)? CLOSE_BRACKET ;
 
 // Map: Key-value pairs enclosed in `{ }`, separated by commas or newlines
 map: OPEN_BRACE (mapEntry (COMMA | NEWLINE)* )* CLOSE_BRACE ;
@@ -39,6 +41,7 @@ mapKey: STRING | IDENTIFIER | indexedAttribute | reference ;
 value: BOOL
      | STRING
      | NUMBER
+     | PORT_RANGE
      | list
      | map
      | reference
