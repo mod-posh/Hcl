@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime.Tree;
+using System.Text.RegularExpressions;
 
 namespace ModPosh.Hcl
 {
@@ -29,12 +30,10 @@ namespace ModPosh.Hcl
 
         /// <summary>
         /// Validates the provided HCL input for syntax errors.
-        /// Optionally enforces additional compliance rules for HCL v2.
+        /// Optionally enforces HCL v2 compliance based on client configuration.
         /// </summary>
-        /// <param name="hclInput">The raw HCL input string to validate.</param>
-        /// <returns>
-        /// A <see cref="ValidationResult"/> containing the validation outcome and any syntax errors found.
-        /// </returns>
+        /// <param name="hclInput">The HCL input string to validate.</param>
+        /// <returns>A ValidationResult object containing the validation result and errors.</returns>
         public ValidationResult Validate(string hclInput)
         {
             var lexer = new HclLexer(new AntlrInputStream(hclInput));
@@ -49,7 +48,8 @@ namespace ModPosh.Hcl
             var validationResult = new ValidationResult
             {
                 IsValid = !errorListener.HasErrors,
-                Errors = errorListener.GetErrorsList()
+                Errors = errorListener.GetErrorsList(),
+                DetailedError = GenerateDetailedError(hclInput, errorListener.GetErrorsList())
             };
 
             if (validationResult.IsValid && enforceHclV2)
@@ -58,6 +58,85 @@ namespace ModPosh.Hcl
             }
 
             return validationResult;
+        }
+
+        /// <summary>
+        /// Generates a detailed error message based on common syntax issues.
+        /// </summary>
+        /// <param name="hclInput">The HCL input string.</param>
+        /// <param name="errors">The list of syntax errors detected.</param>
+        /// <returns>A detailed error message with suggestions for fixing issues.</returns>
+        private string GenerateDetailedError(string hclInput, List<string> errors)
+        {
+            foreach (var error in errors)
+            {
+                if (error.Contains("expecting {'${', BOOL, STRING, NUMBER, IDENTIFIER, '{', '['}") &&
+                    error.Contains("Offending token: ]"))
+                {
+                    // Extract offending line number
+                    var lineNumber = ExtractLineNumberFromError(error);
+                    if (lineNumber != null)
+                    {
+                        var offendingLine = GetLineByNumber(hclInput, lineNumber.Value - 1); // Check the previous line
+                        if (!string.IsNullOrWhiteSpace(offendingLine) && offendingLine.TrimEnd().EndsWith(","))
+                        {
+                            return $"{error} - A potential trailing comma is detected on line {lineNumber.Value - 1}. Ensure no trailing commas exist in lists or maps.";
+                        }
+                    }
+                }
+            }
+            return string.Join("; ", errors);
+        }
+
+        /// <summary>
+        /// Extracts the line number from the error message.
+        /// </summary>
+        /// <param name="error">The error message string.</param>
+        /// <returns>The line number as an integer, or null if not found.</returns>
+        private int? ExtractLineNumberFromError(string error)
+        {
+            var match = Regex.Match(error, @"Line (\d+):");
+            if (match.Success && int.TryParse(match.Groups[1].Value, out var lineNumber))
+            {
+                return lineNumber;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Retrieves the content of a specific line in a string by line number.
+        /// </summary>
+        /// <param name="text">The input string with lines separated by newlines.</param>
+        /// <param name="lineNumber">The 1-based line number to retrieve.</param>
+        /// <returns>The content of the specified line, or null if out of range.</returns>
+        private string? GetLineByNumber(string text, int lineNumber)
+        {
+            var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            if (lineNumber > 0 && lineNumber <= lines.Length)
+            {
+                return lines[lineNumber - 1];
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Retrieves the offending line from the input based on the error message.
+        /// </summary>
+        /// <param name="hclInput">The HCL input string.</param>
+        /// <param name="error">The error message containing the line number.</param>
+        /// <returns>The offending line of HCL code, or null if not found.</returns>
+        private string? GetOffendingLine(string hclInput, string error)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(error, @"Line (\d+):");
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int lineNumber))
+            {
+                var lines = hclInput.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
+                if (lineNumber > 0 && lineNumber <= lines.Length)
+                {
+                    return lines[lineNumber - 1];
+                }
+            }
+            return null;
         }
 
         /// <summary>
