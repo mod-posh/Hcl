@@ -108,7 +108,20 @@ namespace ModPosh.Hcl
         /// </summary>
         private List<object> VisitDocument(HclParser.DocumentContext context)
         {
-            return context.block().Select(block => (object)VisitBlock(block)).ToList();
+            var blocks = new List<object>();
+            foreach (var block in context.block())
+            {
+                try
+                {
+                    blocks.Add(VisitBlock(block));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error visiting block: {block.GetText()}\n{ex.Message}");
+                    throw;
+                }
+            }
+            return blocks;
         }
 
         /// <summary>
@@ -116,25 +129,45 @@ namespace ModPosh.Hcl
         /// </summary>
         private Dictionary<string, object?> VisitBlock(HclParser.BlockContext context)
         {
-            var blockType = context.IDENTIFIER().GetText();
-            var blockName = context.STRING(0)?.GetText()?.Trim('"');
-            var optionalLabel = context.STRING(1)?.GetText()?.Trim('"');
-
-            var body = VisitBody(context.body());
-            return new Dictionary<string, object?>
+            try
             {
-                ["type"] = blockType,
-                ["name"] = blockName,
-                ["optionalLabel"] = optionalLabel,
-                ["body"] = body
-            };
+                var blockType = context.IDENTIFIER().GetText();
+                var blockName = context.STRING(0)?.GetText()?.Trim('"');
+                var optionalLabel = context.STRING(1)?.GetText()?.Trim('"');
+
+                // Handle the body gracefully
+                var bodyContext = context.body();
+                var body = bodyContext != null ? VisitBody(bodyContext) : new Dictionary<string, object?>();
+
+                return new Dictionary<string, object?>
+                {
+                    ["type"] = blockType,
+                    ["name"] = blockName,
+                    ["optionalLabel"] = optionalLabel,
+                    ["body"] = body
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error visiting block: {context.GetText()} - {ex.Message}");
+                throw;
+            }
         }
 
         /// <summary>
         /// Visits the body of a block and extracts attributes, nested blocks, and handles comments/newlines.
         /// </summary>
+        /// <summary>
+        /// Visits the body of a block and extracts attributes, nested blocks, and handles comments/newlines.
+        /// </summary>
         private Dictionary<string, object?> VisitBody(HclParser.BodyContext context)
         {
+            if (context == null || context.children == null || context.children.Count == 0)
+            {
+                // Return an empty dictionary for empty body contexts
+                return new Dictionary<string, object?>();
+            }
+
             var bodyData = new Dictionary<string, object?>();
 
             foreach (var element in context.children)
@@ -148,8 +181,13 @@ namespace ModPosh.Hcl
                     case HclParser.NestedBlockContext nested:
                         bodyData[nested.IDENTIFIER().GetText()] = VisitBody(nested.body());
                         break;
+
+                    default:
+                        Console.WriteLine($"Unhandled element in body: {element.GetText()}");
+                        break;
                 }
             }
+
             return bodyData;
         }
 
