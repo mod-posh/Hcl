@@ -141,6 +141,16 @@ public interface IHclListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitMapKey([NotNull] HclParser.MapKeyContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.multilineString"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMultilineString([NotNull] HclParser.MultilineStringContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.multilineString"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMultilineString([NotNull] HclParser.MultilineStringContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.value"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

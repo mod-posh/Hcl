@@ -36,8 +36,12 @@ namespace ModPosh.Hcl
         /// <returns>A ValidationResult object containing the validation result and errors.</returns>
         public ValidationResult Validate(string hclInput)
         {
-            var lexer = new HclLexer(new AntlrInputStream(hclInput));
-            var parser = new HclParser(new CommonTokenStream(lexer));
+            // Preprocess multi-line strings
+            var preprocessedInput = PreprocessMultilineStrings(hclInput);
+
+            var lexer = new HclLexer(new AntlrInputStream(preprocessedInput));
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new HclParser(tokens);
 
             var errorListener = new SyntaxErrorListener();
             parser.RemoveErrorListeners();
@@ -45,19 +49,12 @@ namespace ModPosh.Hcl
 
             parser.document(); // Parse the document
 
-            var validationResult = new ValidationResult
+            return new ValidationResult
             {
                 IsValid = !errorListener.HasErrors,
                 Errors = errorListener.GetErrorsList(),
-                DetailedError = GenerateDetailedError(hclInput, errorListener.GetErrorsList())
+                DetailedError = GenerateDetailedError(preprocessedInput, errorListener.GetErrorsList())
             };
-
-            if (validationResult.IsValid && enforceHclV2)
-            {
-                validationResult = EnforceHclV2Compliance(hclInput);
-            }
-
-            return validationResult;
         }
 
         /// <summary>
@@ -175,8 +172,12 @@ namespace ModPosh.Hcl
         /// </exception>
         public object Parse(string hclInput)
         {
-            var lexer = new HclLexer(new AntlrInputStream(hclInput));
-            var parser = new HclParser(new CommonTokenStream(lexer));
+            // Preprocess multi-line strings to collapse `<<-EOT ... EOT` syntax
+            var preprocessedInput = PreprocessMultilineStrings(hclInput);
+
+            var lexer = new HclLexer(new AntlrInputStream(preprocessedInput));
+            var tokens = new CommonTokenStream(lexer);
+            var parser = new HclParser(tokens);
 
             var errorListener = new SyntaxErrorListener();
             parser.RemoveErrorListeners();
@@ -460,6 +461,23 @@ namespace ModPosh.Hcl
         private string VisitInterpolation(HclParser.InterpolationContext context)
         {
             return context.GetText();
+        }
+        private string PreprocessMultilineStrings(string input)
+        {
+            var pattern = @"<<-\s*(\w+)\s*\n(.*?)\n\s*\1";
+            return Regex.Replace(input, pattern, match =>
+            {
+                var identifier = match.Groups[1].Value;
+                var content = match.Groups[2].Value;
+
+                // Collapse lines and escape quotes and newlines
+                var collapsedContent = content
+                    .Trim()  // Remove leading/trailing spaces
+                    .Replace("\n", "\\n")
+                    .Replace("\"", "\\\""); // Escape double quotes
+
+                return $"\"{collapsedContent}\"";
+            }, RegexOptions.Singleline);
         }
     }
 }

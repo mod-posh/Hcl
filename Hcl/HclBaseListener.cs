@@ -168,6 +168,18 @@ public partial class HclBaseListener : IHclListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitMapKey([NotNull] HclParser.MapKeyContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="HclParser.multilineString"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMultilineString([NotNull] HclParser.MultilineStringContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="HclParser.multilineString"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMultilineString([NotNull] HclParser.MultilineStringContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="HclParser.value"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

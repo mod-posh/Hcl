@@ -10,7 +10,7 @@ block: IDENTIFIER blockLabel? OPEN_BRACE body CLOSE_BRACE ;
 blockLabel: STRING+ ;
 
 // The body of a block, allowing attributes, nested blocks, or comments
-body: (attribute | nestedBlock | COMMENT | NEWLINE)* ;
+body: (attribute | nestedBlock | COMMENT | COMMENT_MULTI | NEWLINE)* ;
 
 // Attributes for key-value pairs
 attribute: IDENTIFIER EQUAL value ;
@@ -33,9 +33,12 @@ mapEntry: mapKey EQUAL value ;
 // Map Key: Supports identifiers, strings, indexed attributes, and references
 mapKey: STRING | IDENTIFIER | indexedAttribute | reference ;
 
+multilineString: '<<-' IDENTIFIER NEWLINE (~NEWLINE)* NEWLINE IDENTIFIER NEWLINE? ;
+
 // Values: Can be booleans, strings, numbers, lists, maps, references, interpolations, or function calls
 value: BOOL
      | STRING
+     | multilineString
      | NUMBER
      | PORT_RANGE
      | list
@@ -43,7 +46,8 @@ value: BOOL
      | reference
      | indexedReference
      | interpolation
-     | functionCall ;
+     | functionCall
+     | 'null' ;
 
 // Interpolations: `${expression}`
 interpolation: '${' expression '}' ;
@@ -79,8 +83,9 @@ PORT_RANGE: [0-9]+ '-' [0-9]+ ;
 // Identifiers (used for keys, resource types, etc.)
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_-]* ;
 
-// Comments (`# ...`)
+// Comments (`# ...` and `/* ... */`)
 COMMENT: '#' ~[\r\n]* -> skip ;
+COMMENT_MULTI: '/*' .*? '*/' -> skip ;
 
 // Skip whitespace
 WHITESPACE: [ \t\r\n]+ -> skip ;
@@ -95,3 +100,8 @@ OPEN_PAREN: '(' ;
 CLOSE_PAREN: ')' ;
 COMMA: ',' ;
 NEWLINE: [\r\n]+ -> skip ;
+
+// Add support for interpolations in expressions
+fragment DOLLAR: '$' ;
+fragment CURLY_OPEN: '{' ;
+fragment CURLY_CLOSE: '}' ;
