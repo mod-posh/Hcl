@@ -230,9 +230,8 @@ namespace ModPosh.Hcl
                 .Select(label => label.GetText().Trim('"')) // Trim quotes if STRING
                 .ToList();
 
-            // Determine the primary name and optional label
+            // Determine the primary name
             var blockName = blockLabels != null && blockLabels.Count > 0 ? blockLabels[0] : null;
-            var optionalLabel = blockLabels != null && blockLabels.Count > 1 ? blockLabels[1] : null;
 
             // Check if the block has a body
             var body = context.body() != null ? VisitBody(context.body()) : new Dictionary<string, object?>();
@@ -241,7 +240,6 @@ namespace ModPosh.Hcl
             {
                 ["type"] = blockType,
                 ["name"] = blockName,
-                ["optionalLabel"] = optionalLabel,
                 ["body"] = body
             };
         }
@@ -462,6 +460,12 @@ namespace ModPosh.Hcl
         {
             return context.GetText();
         }
+        /// <summary>
+        /// Preprocesses the HCL input to handle multi-line strings with `<<-EOT ... EOT` syntax.
+        /// Converts multi-line strings into a single-line format for easier parsing by the lexer.
+        /// </summary>
+        /// <param name="input">The raw HCL input string.</param>
+        /// <returns>The preprocessed HCL string with multi-line strings collapsed into single-line strings.</returns>
         private string PreprocessMultilineStrings(string input)
         {
             var pattern = @"<<-\s*(\w+)\s*\n(.*?)\n\s*\1";
