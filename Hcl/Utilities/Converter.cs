@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace ModPosh.Hcl
+namespace ModPosh.Hcl.Utilities
 {
     /// <summary>
     /// Provides methods to convert between HCL and JSON formats.

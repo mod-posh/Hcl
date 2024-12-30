@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace ModPosh.Hcl.Models
 {
-    public abstract class HclBlock
+    public class Terraform : HclBlock
+    {
+        public List<Backend> Backends { get; set; } = new();
+    }
+    public class Backend
     {
         public string Type { get; set; } = string.Empty;
-        public string? Name { get; set; }
-        public Dictionary<string, HclValue> Body { get; set; } = new();
+        public Dictionary<string, HclValue>? Body { get; set; }
     }
 }
