@@ -9,5 +9,13 @@ namespace ModPosh.Hcl.Models
     public class Output : HclBlock
     {
         public HclValue? Value { get; set; }
+        public override string ToHcl()
+        {
+            throw new NotImplementedException();
+        }
+        public override string ToJson()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -11,5 +11,8 @@ namespace ModPosh.Hcl.Models
         public string Type { get; set; } = string.Empty;
         public string? Name { get; set; }
         public Dictionary<string, HclValue> Body { get; set; } = new();
+
+        public abstract string ToHcl();
+        public abstract string ToJson();
     }
 }

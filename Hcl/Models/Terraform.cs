@@ -9,6 +9,14 @@ namespace ModPosh.Hcl.Models
     public class Terraform : HclBlock
     {
         public List<Backend> Backends { get; set; } = new();
+        public override string ToHcl()
+        {
+            throw new NotImplementedException();
+        }
+        public override string ToJson()
+        {
+            throw new NotImplementedException();
+        }
     }
     public class Backend
     {

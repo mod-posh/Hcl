@@ -6,5 +6,15 @@ using System.Threading.Tasks;
 
 namespace ModPosh.Hcl.Models
 {
-    public class Provider : HclBlock { }
+    public class Provider : HclBlock
+    {
+        public override string ToHcl()
+        {
+            throw new NotImplementedException();
+        }
+        public override string ToJson()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
