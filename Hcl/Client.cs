@@ -33,10 +33,9 @@ namespace ModPosh.Hcl
         /// Optionally enforces HCL v2 compliance based on client configuration.
         /// </summary>
         /// <param name="hclInput">The HCL input string to validate.</param>
-        /// <returns>A ValidationResult object containing the validation result and errors.</returns>
+        /// <returns>A <see cref="ValidationResult"/> containing the validation result and errors.</returns>
         public ValidationResult Validate(string hclInput)
         {
-            // Preprocess multi-line strings
             var preprocessedInput = PreprocessMultilineStrings(hclInput);
 
             var lexer = new HclLexer(new AntlrInputStream(preprocessedInput));
@@ -47,7 +46,7 @@ namespace ModPosh.Hcl
             parser.RemoveErrorListeners();
             parser.AddErrorListener(errorListener);
 
-            parser.document(); // Parse the document
+            parser.document();
 
             return new ValidationResult
             {
@@ -56,13 +55,13 @@ namespace ModPosh.Hcl
                 DetailedError = GenerateDetailedError(preprocessedInput, errorListener.GetErrorsList())
             };
         }
-
         /// <summary>
         /// Generates a detailed error message based on common syntax issues.
         /// </summary>
-        /// <param name="hclInput">The HCL input string.</param>
-        /// <param name="errors">The list of syntax errors detected.</param>
-        /// <returns>A detailed error message with suggestions for fixing issues.</returns>
+        /// <param name="hclInput">The original HCL input string.</param>
+        /// <param name="errors">A list of syntax errors detected during validation.</param>
+        /// <returns>A detailed error message with suggestions for fixing specific issues.</returns>
+        /// 
         private string GenerateDetailedError(string hclInput, List<string> errors)
         {
             foreach (var error in errors)
@@ -86,10 +85,10 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Extracts the line number from the error message.
+        /// Extracts the line number from a given error message string.
         /// </summary>
-        /// <param name="error">The error message string.</param>
-        /// <returns>The line number as an integer, or null if not found.</returns>
+        /// <param name="error">The error message containing the line number.</param>
+        /// <returns>The line number as an integer, or null if the line number cannot be determined.</returns>
         private int? ExtractLineNumberFromError(string error)
         {
             var match = Regex.Match(error, @"Line (\d+):");
@@ -101,11 +100,11 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Retrieves the content of a specific line in a string by line number.
+        /// Retrieves the content of a specific line in the provided HCL input string.
         /// </summary>
-        /// <param name="text">The input string with lines separated by newlines.</param>
+        /// <param name="text">The full HCL input string, with lines separated by newlines.</param>
         /// <param name="lineNumber">The 1-based line number to retrieve.</param>
-        /// <returns>The content of the specified line, or null if out of range.</returns>
+        /// <returns>The content of the specified line, or null if the line number is out of range.</returns>
         private string? GetLineByNumber(string text, int lineNumber)
         {
             var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -114,50 +113,6 @@ namespace ModPosh.Hcl
                 return lines[lineNumber - 1];
             }
             return null;
-        }
-
-        /// <summary>
-        /// Retrieves the offending line from the input based on the error message.
-        /// </summary>
-        /// <param name="hclInput">The HCL input string.</param>
-        /// <param name="error">The error message containing the line number.</param>
-        /// <returns>The offending line of HCL code, or null if not found.</returns>
-        private string? GetOffendingLine(string hclInput, string error)
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(error, @"Line (\d+):");
-            if (match.Success && int.TryParse(match.Groups[1].Value, out int lineNumber))
-            {
-                var lines = hclInput.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
-                if (lineNumber > 0 && lineNumber <= lines.Length)
-                {
-                    return lines[lineNumber - 1];
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Enforces additional compliance rules specific to HCL v2.
-        /// </summary>
-        /// <param name="hclInput">The raw HCL input string.</param>
-        /// <returns>
-        /// A <see cref="ValidationResult"/> indicating whether the input complies with HCL v2 rules.
-        /// </returns>
-        private ValidationResult EnforceHclV2Compliance(string hclInput)
-        {
-            var errors = new List<string>();
-
-            // Example compliance rule: Ensure all map keys are strings.
-            if (hclInput.Contains("{") && hclInput.Contains("=") && !hclInput.Contains("\""))
-            {
-                errors.Add("HCL v2 requires all map keys to be enclosed in double quotes.");
-            }
-
-            return new ValidationResult
-            {
-                IsValid = errors.Count == 0,
-                Errors = errors
-            };
         }
 
         /// <summary>
@@ -172,7 +127,6 @@ namespace ModPosh.Hcl
         /// </exception>
         public object Parse(string hclInput)
         {
-            // Preprocess multi-line strings to collapse `<<-EOT ... EOT` syntax
             var preprocessedInput = PreprocessMultilineStrings(hclInput);
 
             var lexer = new HclLexer(new AntlrInputStream(preprocessedInput));
@@ -197,69 +151,91 @@ namespace ModPosh.Hcl
         /// Processes the top-level document context to extract and process all blocks.
         /// </summary>
         /// <param name="context">The document context from the HCL parser.</param>
-        /// <returns>A list of parsed block objects.</returns>
-        private List<object> VisitDocument(HclParser.DocumentContext context)
+        /// <returns>An <see cref="HclDocument"/> representing the parsed document structure.</returns>
+        private HclDocument VisitDocument(HclParser.DocumentContext context)
         {
-            var blocks = new List<object>();
-            foreach (var block in context.block())
+            var document = new HclDocument();
+
+            foreach (var blockContext in context.block())
             {
-                try
+                var block = VisitBlock(blockContext);
+
+                switch (block.Type)
                 {
-                    blocks.Add(VisitBlock(block));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error visiting block: {block.GetText()}\n{ex.Message}");
-                    throw;
+                    case "provider":
+                        document.Providers.Add((Provider)block);
+                        break;
+                    case "resource":
+                        document.Resources.Add((Resource)block);
+                        break;
+                    case "variable":
+                        document.Variables.Add((Variable)block);
+                        break;
+                    case "module":
+                        document.Modules.Add((Module)block);
+                        break;
+                    case "data":
+                        document.DataBlocks.Add((Data)block);
+                        break;
+                    case "terraform":
+                        document.TerraformBlocks.Add((Terraform)block);
+                        break;
+                    case "output":
+                        document.Outputs.Add((Output)block);
+                        break;
+                    default:
+                        Console.WriteLine($"Unhandled block type: {block.Type}");
+                        break;
                 }
             }
-            return blocks;
+
+            return document;
         }
 
         /// <summary>
         /// Visits a block and extracts its type, name, optional label, and body.
         /// </summary>
         /// <param name="context">The block context from the HCL parser.</param>
-        /// <returns>A dictionary representing the block's parsed structure.</returns>
-        private Dictionary<string, object?> VisitBlock(HclParser.BlockContext context)
+        /// <returns>An <see cref="HclBlock"/> representing the parsed block.</returns>
+        private HclBlock VisitBlock(HclParser.BlockContext context)
         {
-            var blockType = context.IDENTIFIER().GetText();
+            if (context == null)
+                throw new ArgumentNullException(nameof(context), "Block context is null");
 
-            // Collect block labels from the blockLabel rule
+            var blockType = context.IDENTIFIER()?.GetText() ?? throw new Exception("Block type is null");
             var blockLabels = context.blockLabel()?.children
-                .Select(label => label.GetText().Trim('"')) // Trim quotes if STRING
-                .ToList();
+                ?.Select(label => label.GetText().Trim('"'))
+                .ToList() ?? new List<string>();
 
-            // Determine the primary name
-            var blockName = blockLabels != null && blockLabels.Count > 0 ? blockLabels[0] : null;
+            var blockName = blockLabels.FirstOrDefault();
+            var blockBody = context.body() != null ? VisitBody(context.body()) : new Dictionary<string, HclValue>();
 
-            // Check if the block has a body
-            var body = context.body() != null ? VisitBody(context.body()) : new Dictionary<string, object?>();
-
-            return new Dictionary<string, object?>
+            return blockType switch
             {
-                ["type"] = blockType,
-                ["name"] = blockName,
-                ["body"] = body
+                "provider" => new Provider { Type = blockType, Name = blockName, Body = blockBody },
+                "resource" => new Resource { Type = blockType, Name = blockName, Body = blockBody },
+                "variable" => new Variable { Type = blockType, Name = blockName, Body = blockBody },
+                "module" => new Module { Type = blockType, Name = blockName, Body = blockBody },
+                "data" => new Data { Type = blockType, Name = blockName, Body = blockBody },
+                "terraform" => VisitTerraformBlock(blockBody),
+                "output" => VisitOutputBlock(blockName, blockBody),
+                _ => throw new Exception($"Unhandled block type: {blockType}")
             };
         }
 
         /// <summary>
-        /// Visits the body of a block and extracts attributes, nested blocks, and handles comments/newlines.
+        /// Processes the body of a block and extracts attributes, nested blocks, and handles comments/newlines.
         /// </summary>
         /// <param name="context">The body context from the HCL parser.</param>
         /// <returns>A dictionary representing the body's parsed structure.</returns>
-        private Dictionary<string, object?> VisitBody(HclParser.BodyContext context)
+        private Dictionary<string, HclValue> VisitBody(HclParser.BodyContext context)
         {
-            if (context == null || context.children == null || context.children.Count == 0)
-            {
-                // Return an empty dictionary for empty or null body contexts
-                return new Dictionary<string, object?>();
-            }
+            if (context == null)
+                return new Dictionary<string, HclValue>();
 
-            var bodyData = new Dictionary<string, object?>();
+            var bodyData = new Dictionary<string, HclValue>();
 
-            foreach (var element in context.children)
+            foreach (var element in context.children ?? Enumerable.Empty<IParseTree>())
             {
                 switch (element)
                 {
@@ -268,7 +244,25 @@ namespace ModPosh.Hcl
                         break;
 
                     case HclParser.NestedBlockContext nested:
-                        bodyData[nested.IDENTIFIER().GetText()] = VisitBody(nested.body());
+                        var nestedBlock = VisitNestedBlock(nested);
+                        var nestedType = nestedBlock["type"]?.Value?.ToString();
+
+                        if (string.IsNullOrWhiteSpace(nestedType))
+                        {
+                            Console.WriteLine($"Encountered nested block with null or empty type: {nestedBlock}");
+                            continue;
+                        }
+
+                        if (!bodyData.ContainsKey(nestedType))
+                        {
+                            bodyData[nestedType] = new HclValue
+                            {
+                                Type = HclValueType.List,
+                                Value = new List<Dictionary<string, HclValue>>()
+                            };
+                        }
+
+                        ((List<Dictionary<string, HclValue>>)bodyData[nestedType].Value!).Add(nestedBlock);
                         break;
 
                     default:
@@ -281,148 +275,180 @@ namespace ModPosh.Hcl
         }
 
         /// <summary>
-        /// Visits a value context from the HCL parser and determines its type.
+        /// Visits a nested block and extracts its type, name, and body.
         /// </summary>
-        /// <param name="context">The value context from the HCL parser.</param>
-        /// <returns>
-        /// An object representing the value, which could be a boolean, string, number, list, map,
-        /// reference, interpolation, or function call.
-        /// </returns>
-        private object? VisitValue(HclParser.ValueContext context)
+        /// <param name="context">The nested block context from the HCL parser.</param>
+        /// <returns>A dictionary representing the nested block structure.</returns>
+        private Dictionary<string, HclValue> VisitNestedBlock(HclParser.NestedBlockContext context)
         {
-            if (context.STRING() != null)
-            {
-                // Return the string value with quotes trimmed
-                return context.STRING().GetText().Trim('"');
-            }
-            if (context.NUMBER() != null)
-            {
-                // Parse and return a numeric value
-                return double.Parse(context.NUMBER().GetText());
-            }
-            if (context.BOOL() != null)
-            {
-                // Return the boolean value
-                return context.BOOL().GetText() == "true";
-            }
-            if (context.list() != null)
-            {
-                // Process and return a list of values
-                return VisitList(context.list());
-            }
-            if (context.map() != null)
-            {
-                // Process and return a map of key-value pairs
-                return VisitMap(context.map());
-            }
-            if (context.reference() != null)
-            {
-                // Process and return a reference
-                return VisitReference(context.reference());
-            }
-            if (context.interpolation() != null)
-            {
-                // Process and return an interpolation expression
-                return VisitInterpolation(context.interpolation());
-            }
-            if (context.functionCall() != null)
-            {
-                // Process and return a function call
-                return VisitFunctionCall(context.functionCall());
-            }
+            if (context == null)
+                throw new ArgumentNullException(nameof(context), "Nested block context is null");
 
-            // If no known type is found, return null
-            return null;
+            var nestedType = context.IDENTIFIER()?.GetText() ?? throw new Exception("Nested block type is null");
+            var nestedLabels = context.blockLabel()?.children
+                ?.Select(label => label.GetText().Trim('"'))
+                .ToList() ?? new List<string>();
+
+            var nestedName = nestedLabels.FirstOrDefault();
+            var nestedBody = context.body() != null ? VisitBody(context.body()) : new Dictionary<string, HclValue>();
+
+            return new Dictionary<string, HclValue>
+            {
+                ["type"] = new HclValue { Type = HclValueType.String, Value = nestedType },
+                ["name"] = new HclValue { Type = HclValueType.String, Value = nestedName },
+                ["body"] = new HclValue { Type = HclValueType.Map, Value = nestedBody }
+            };
         }
 
         /// <summary>
-        /// Processes a function call context and extracts its textual representation.
+        /// Visits a Terraform block and extracts its backends.
         /// </summary>
-        /// <param name="context">The function call context from the HCL parser.</param>
-        /// <returns>
-        /// A string representing the function call, including the function name and arguments.
-        /// </returns>
-        private string VisitFunctionCall(HclParser.FunctionCallContext context)
+        /// <param name="body">The body of the Terraform block.</param>
+        /// <returns>A <see cref="Terraform"/> object representing the block.</returns>
+        private Terraform VisitTerraformBlock(Dictionary<string, HclValue> body)
         {
-            var functionName = context.IDENTIFIER().GetText();
-            var arguments = context.value().Select(VisitValue).ToList();
+            var terraform = new Terraform { Type = "terraform" };
 
-            return $"{functionName}({string.Join(", ", arguments)})";
+            if (body.TryGetValue("backend", out var backendValue) &&
+                backendValue.Value is List<Dictionary<string, HclValue>> backendBlocks)
+            {
+                foreach (var backendBlock in backendBlocks)
+                {
+                    var backendType = backendBlock.ContainsKey("type") ? backendBlock["type"].Value?.ToString() : null;
+                    var backendBody = backendBlock.ContainsKey("body") ? backendBlock["body"].Value as Dictionary<string, HclValue> : null;
+
+                    if (backendType != null)
+                    {
+                        terraform.Backends.Add(new Backend
+                        {
+                            Type = backendType,
+                            Body = backendBody
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine("Backend block missing required 'type' field.");
+                    }
+                }
+            }
+
+            return terraform;
+        }
+
+        /// <summary>
+        /// Visits an output block and extracts its name and value.
+        /// </summary>
+        /// <param name="name">The name of the output block.</param>
+        /// <param name="body">The body of the output block.</param>
+        /// <returns>An <see cref="Output"/> object representing the block.</returns>
+        private Output VisitOutputBlock(string? name, Dictionary<string, HclValue> body)
+        {
+            var output = new Output { Type = "output", Name = name };
+
+            if (body.TryGetValue("value", out var value))
+            {
+                output.Value = value;
+            }
+            else
+            {
+                throw new Exception($"Output block '{name}' is missing a 'value' attribute.");
+            }
+
+            return output;
+        }
+
+        /// <summary>
+        /// Preprocesses the HCL input to handle multi-line strings with `<<-EOT ... EOT` syntax.
+        /// </summary>
+        /// <param name="input">The raw HCL input string.</param>
+        /// <returns>The preprocessed HCL string with multi-line strings collapsed into single-line strings.</returns>
+        private string PreprocessMultilineStrings(string input)
+        {
+            var pattern = @"<<-\s*(\w+)\s*\n(.*?)\n\s*\1";
+            return Regex.Replace(input, pattern, match =>
+            {
+                var identifier = match.Groups[1].Value;
+                var content = match.Groups[2].Value;
+
+                var collapsedContent = content
+                    .Trim()
+                    .Replace("\n", "\\n")
+                    .Replace("\"", "\\\"");
+
+                return $"\"{collapsedContent}\"";
+            }, RegexOptions.Singleline);
+        }
+
+        /// <summary>
+        /// Visits a value context and determines its type.
+        /// </summary>
+        /// <param name="context">The value context from the HCL parser.</param>
+        /// <returns>An <see cref="HclValue"/> representing the parsed value.</returns>
+        private HclValue VisitValue(HclParser.ValueContext context)
+        {
+            if (context.STRING() != null)
+            {
+                return new HclValue
+                {
+                    Type = HclValueType.String,
+                    Value = context.STRING().GetText().Trim('"')
+                };
+            }
+            if (context.NUMBER() != null)
+            {
+                return new HclValue
+                {
+                    Type = HclValueType.Number,
+                    Value = double.Parse(context.NUMBER().GetText())
+                };
+            }
+            if (context.BOOL() != null)
+            {
+                return new HclValue
+                {
+                    Type = HclValueType.Boolean,
+                    Value = context.BOOL().GetText() == "true"
+                };
+            }
+            if (context.list() != null)
+            {
+                return new HclValue
+                {
+                    Type = HclValueType.List,
+                    Value = VisitList(context.list())
+                };
+            }
+            if (context.map() != null)
+            {
+                return new HclValue
+                {
+                    Type = HclValueType.Map,
+                    Value = VisitMap(context.map())
+                };
+            }
+
+            return new HclValue
+            {
+                Type = HclValueType.Unknown,
+                Value = null
+            };
         }
 
         /// <summary>
         /// Processes a list and extracts its elements.
         /// </summary>
         /// <param name="context">The list context from the HCL parser.</param>
-        /// <returns>A list of parsed elements.</returns>
-        private List<object?> VisitList(HclParser.ListContext context)
+        /// <returns>A list of <see cref="HclValue"/> objects representing the elements.</returns>
+        private List<HclValue> VisitList(HclParser.ListContext context)
         {
             return context.value().Select(VisitValue).ToList();
         }
 
         /// <summary>
-        /// Processes a reference and constructs its representation.
-        /// </summary>
-        /// <param name="context">The reference context from the HCL parser.</param>
-        /// <returns>The textual representation of the reference.</returns>
-        private string VisitReference(HclParser.ReferenceContext context)
-        {
-            var parts = new List<string>();
-
-            // Add the first IDENTIFIER
-            parts.Add(context.IDENTIFIER(0).GetText());
-
-            // Traverse the remaining parts of the reference
-            for (int i = 1; i < context.ChildCount; i++)
-            {
-                var child = context.GetChild(i);
-
-                if (child is ITerminalNode terminal)
-                {
-                    // Handle '.' and '*' correctly
-                    var text = terminal.GetText();
-                    if (text == ".")
-                    {
-                        // Avoid adding consecutive dots
-                        if (parts.LastOrDefault() != ".")
-                        {
-                            parts.Add(text);
-                        }
-                    }
-                    else if (text == "*")
-                    {
-                        parts.Add(text);
-                    }
-                }
-                else if (child is HclParser.IndexedReferenceContext indexedReference)
-                {
-                    var key = indexedReference.GetChild(2).GetText(); // Either STRING, NUMBER, or '*'
-                    parts.Add($"[{key}]");
-
-                    // Handle additional properties after indexed references
-                    if (indexedReference.ChildCount > 4)
-                    {
-                        for (int j = 4; j < indexedReference.ChildCount; j += 2)
-                        {
-                            parts.Add(indexedReference.GetChild(j).GetText());
-                        }
-                    }
-                }
-            }
-
-            // Join parts without introducing extra periods
-            return string.Join("", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
-        }
-
-        /// <summary>
-        /// Processes a map context and extracts key-value pairs.
+        /// Processes a map and extracts its key-value pairs.
         /// </summary>
         /// <param name="context">The map context from the HCL parser.</param>
-        /// <returns>
-        /// A dictionary where the keys are strings and the values are parsed objects,
-        /// representing the key-value pairs in the HCL map.
-        /// </returns>
-        /// <exception cref="Exception">Throws if the map context or map entries are null.</exception>
+        /// <returns>A dictionary representing the map.</returns>
         private Dictionary<string, object?> VisitMap(HclParser.MapContext context)
         {
             if (context?.mapEntry() == null)
@@ -439,7 +465,6 @@ namespace ModPosh.Hcl
 
                 if (key != null)
                 {
-                    // Parse the value associated with the key
                     map[key] = VisitValue(entry.value());
                 }
                 else
@@ -449,39 +474,6 @@ namespace ModPosh.Hcl
             }
 
             return map;
-        }
-
-        /// <summary>
-        /// Processes an interpolation and extracts its expression.
-        /// </summary>
-        /// <param name="context">The interpolation context from the HCL parser.</param>
-        /// <returns>The string representation of the interpolation.</returns>
-        private string VisitInterpolation(HclParser.InterpolationContext context)
-        {
-            return context.GetText();
-        }
-        /// <summary>
-        /// Preprocesses the HCL input to handle multi-line strings with `<<-EOT ... EOT` syntax.
-        /// Converts multi-line strings into a single-line format for easier parsing by the lexer.
-        /// </summary>
-        /// <param name="input">The raw HCL input string.</param>
-        /// <returns>The preprocessed HCL string with multi-line strings collapsed into single-line strings.</returns>
-        private string PreprocessMultilineStrings(string input)
-        {
-            var pattern = @"<<-\s*(\w+)\s*\n(.*?)\n\s*\1";
-            return Regex.Replace(input, pattern, match =>
-            {
-                var identifier = match.Groups[1].Value;
-                var content = match.Groups[2].Value;
-
-                // Collapse lines and escape quotes and newlines
-                var collapsedContent = content
-                    .Trim()  // Remove leading/trailing spaces
-                    .Replace("\n", "\\n")
-                    .Replace("\"", "\\\""); // Escape double quotes
-
-                return $"\"{collapsedContent}\"";
-            }, RegexOptions.Singleline);
         }
     }
 }
