@@ -47,10 +47,10 @@ jobs:
         run: dotnet tool install --global xmldocmd
 
       - name: Build Project
-        run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release
+        run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release
 
       - name: Publish Project
-        run: dotnet publish ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish
+        run: dotnet publish ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish
 
       - name: Generate Documentation
         run: |
