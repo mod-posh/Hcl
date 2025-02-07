@@ -13,7 +13,7 @@ jobs:
 
       - name: Get Project Version
         id: get_version
-        uses: mod-posh/GetProjectVersion@v0.0.2.2
+        uses: mod-posh/GetProjectVersion@main
         with:
           Filename: '${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj'
           verbose: "verbose"
@@ -63,12 +63,6 @@ jobs:
         with:
           globs: '**/*.md'
           fix: true
-
-      - name: Update README using custom action
-        uses: mod-posh/UpdateReadme@main
-        with:
-          project_name: ${{ vars.PROJECT_NAME }}
-          verbose: true          
 
       - name: Commit Documentation Changes
         run: |
