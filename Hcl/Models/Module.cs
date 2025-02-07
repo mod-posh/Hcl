@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ModPosh.Hcl.Models
 {
@@ -16,7 +17,14 @@ namespace ModPosh.Hcl.Models
 
             foreach (var kvp in Body)
             {
-                sb.AppendLine($"  {kvp.Key} = {kvp.Value.ToHcl()}");
+                if (kvp.Value.Type == HclValueType.Map || kvp.Value.Type == HclValueType.List)
+                {
+                    sb.AppendLine($"  {kvp.Key} {kvp.Value.ToHcl()}");
+                }
+                else
+                {
+                    sb.AppendLine($"  {kvp.Key} = {kvp.Value.ToHcl()}");
+                }
             }
 
             sb.AppendLine("}");
@@ -25,8 +33,27 @@ namespace ModPosh.Hcl.Models
 
         public override string ToJson()
         {
-            var keyValuePairs = Body.Select(kvp => $"\"{kvp.Key}\": {kvp.Value.ToJson()}");
-            return $"{{ \"type\": \"module\", \"name\": \"{Name}\", {string.Join(", ", keyValuePairs)} }}";
+            // Create a dictionary representing the module for JSON serialization
+            var jsonObject = new Dictionary<string, object?>
+            {
+                { "type", "module" },
+                { "name", Name }
+            };
+
+            // Add the module body attributes dynamically
+            foreach (var kvp in Body)
+            {
+                jsonObject[kvp.Key] = kvp.Value.Value; // Use the raw value for JSON serialization
+            }
+
+            // Serialize the dictionary to JSON using System.Text.Json
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true, // Pretty-print the JSON
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Ignore null values
+            };
+
+            return JsonSerializer.Serialize(jsonObject, options);
         }
     }
 }
