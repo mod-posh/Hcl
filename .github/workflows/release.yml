@@ -13,7 +13,7 @@ jobs:
 
       - name: Get Project Version
         id: get_version
-        uses: mod-posh/GetProjectVersion@main
+        uses: mod-posh/GetProjectVersion@v0.0.3.0
         with:
           Filename: '${{ vars.PROJECT_NAME }}.csproj'
           verbose: "verbose"
@@ -49,8 +49,11 @@ jobs:
       - name: Build Project
         run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release
 
-      - name: Publish Project
-        run: dotnet publish ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish
+      - name: Pack Project
+        run: dotnet pack ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish /p:PackageId=${{ vars.PROJECT_NAMESPACE }}
+      
+      - name: Push to NuGet
+        run: dotnet nuget push ./publish/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
       - name: Generate Documentation
         run: |
