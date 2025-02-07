@@ -5,9 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>ModPosh.Hcl</RootNamespace>
+    <PackageId>ModPosh.HclParser</PackageId>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Hcl Library</Title>
+    <Title>Hcl Parsing Library</Title>
     <Version>1.0.0</Version>
     <Authors>Jeffrey S. Patton</Authors>
     <Company>Patton-Tech.com</Company>
