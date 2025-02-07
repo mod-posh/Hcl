@@ -22,13 +22,3 @@ jobs:
         run: dotnet build ${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.sln --configuration Release --no-restore
       - name: Package
         run: dotnet pack ${{ github.workspace }}/${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.sln --configuration Release --output nupkgs
-      - name: Setup NuGet CLI
-        run: |
-          curl -L https://dist.nuget.org/win-x86-commandline/latest/nuget.exe --output nuget.exe
-      - name: Create Nuget Config
-        run: |
-          ./nuget.exe config
-          ./nuget.exe setapikey "${{ secrets.NUGET_API_KEY }}"  -verbosity quiet
-      - name: Publish NuGet Package
-        run: nuget push .\nupkgs\*.nupkg -Source "https://api.nuget.org/v3/index.json"
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
