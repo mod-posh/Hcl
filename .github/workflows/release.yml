@@ -53,13 +53,37 @@ jobs:
         run: dotnet tool install --global xmldocmd
 
       - name: Build Project
-        run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish
+        run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release
 
       - name: Pack Project
         run: dotnet pack ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish /p:PackageId=${{ vars.PROJECT_ID }}
       
       - name: Push to NuGet
         run: dotnet nuget push ./publish/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Find and Copy Build Files to Publish Folder
+        shell: pwsh
+        run: |
+          # Find the DLL's exact location within any bin/Release/ directory
+          $dllPath = Get-ChildItem -Path . -Recurse -Filter "${{ vars.PROJECT_NAME }}.dll" -File | Select-Object -First 1
+      
+          if (-not $dllPath) {
+            Write-Error "Error: DLL not found!"
+            exit 1
+          }
+      
+          # Extract the parent bin/Release directory path
+          $releaseDir = $dllPath.Directory.FullName
+      
+          Write-Output "Found DLL at: $dllPath"
+          Write-Output "Copying all files from: $releaseDir"
+      
+          # Ensure publish directory exists
+          New-Item -Path "./publish" -ItemType Directory -Force
+      
+          # Copy everything from the located Release folder into ./publish/
+          Copy-Item -Path "$releaseDir\*" -Destination "./publish/" -Recurse -Force
+
 
       - name: Generate Documentation
         run: |
