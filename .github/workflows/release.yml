@@ -53,26 +53,13 @@ jobs:
         run: dotnet tool install --global xmldocmd
 
       - name: Build Project
-        run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release
+        run: dotnet build ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish
 
       - name: Pack Project
-        run: dotnet pack ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish /p:PackageId=${{ vars.PROJECT_NAMESPACE }}
+        run: dotnet pack ${{ vars.PROJECT_NAME }}/${{ vars.PROJECT_NAME }}.csproj --configuration Release --output ./publish /p:PackageId=${{ vars.PROJECT_ID }}
       
       - name: Push to NuGet
         run: dotnet nuget push ./publish/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-
-      - name: Find and Copy DLL to Publish Folder
-        shell: pwsh
-        run: |
-          $dllPath = Get-ChildItem -Path . -Recurse -Directory | Where-Object { $_.Name -eq "bin" } |
-                     Get-ChildItem -Recurse -Filter "${{ vars.PROJECT_NAME }}.dll" -File |
-                     Select-Object -First 1
-          if (-not $dllPath) {
-            Write-Error "Error: DLL not found!"
-            exit 1
-          }
-          Write-Output "Found DLL at: $dllPath"
-          Copy-Item -Path $dllPath.FullName -Destination "./publish/"
 
       - name: Generate Documentation
         run: |
