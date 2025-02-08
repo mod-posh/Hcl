@@ -1,71 +1,70 @@
-# C# Project
+| Latest Version | Nuget.org | Issues | Testing | License | Discord |
+|-----------------|-----------------|----------------|----------------|----------------|----------------|
+| [![Latest Version](https://img.shields.io/github/v/tag/mod-posh/Hcl)](https://github.com/mod-posh/Hcl/tags) | [![Nuget.org](https://img.shields.io/nuget/dt/ModPosh.HclParser)](https://www.nuget.org/packages/ModPosh.HclParser) | [![GitHub issues](https://img.shields.io/github/issues/mod-posh/Hcl)](https://github.com/mod-posh/Hcl/issues) | [![Merge Test Workflow](https://github.com/mod-posh/Hcl/actions/workflows/test.yml/badge.svg)](https://github.com/mod-posh/Hcl/actions/workflows/test.yml) | [![GitHub license](https://img.shields.io/github/license/mod-posh/Hcl)](https://github.com/mod-posh/Hcl/blob/master/LICENSE) | [![Discord Server](https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5493894cf60b300587_full_logo_white_RGB.svg)](https://discord.com/channels/1044305359021555793/1044305781627035811) |
+# HCL Parser
 
-Enclosed are the files I use to build and deploy C# Projects. The basic file structure is included so you know what it should look like. Several Modules are required, and the Tasks will check for them at the start.
+## Overview
+The **HCL Parser** is a custom-built C# library designed to parse, manipulate, and generate HashiCorp Configuration Language (HCL) files. This parser plays a crucial role in the Terraform module update process by allowing structured modifications to `variables.tf`, `main.tf`, and other HCL files. The library provides an object-oriented representation of HCL, enabling easy transformations and validation before updating Terraform modules.
 
-## Dependencies
+## Features
+- **HCL Parsing:** Converts HCL into structured objects that can be programmatically modified.
+- **Object-Oriented Representation:** Defines HCL elements as discrete C# objects with overridable methods.
+- **HCL Generation:** Converts modified objects back into valid HCL strings.
+- **PowerShell Compatibility:** Can be integrated into a PowerShell module for automation in CI/CD pipelines.
 
-You will need to have the following modules installed:
+## Installation
+The HCL Parser can be added to a .NET project via NuGet:
 
- 1. PowerShellForGitHub : This is used for the ReleaseNotes task.
- 2. DefaultDocumentation: This is used to generate code documentation from comments.
+```sh
+dotnet add package ModPosh.HclParser
+```
 
-Please see the [psakefile](psakefile.ps1) for the versions currently used.
+Alternatively, if using an internal feed:
 
-## Supporting Files
+```sh
+dotnet nuget add source <internal_feed_url>
+dotnet add package ModPosh.HclParser --source <internal_feed>
+```
 
-There are several files used to help authenticate to various services, and depending on your needs, you may not need them or need something different. You can use them as is, but you must populate the various tokens and keys yourself. Also, you can use them as a template if you need nothing.
+## Usage
 
-### ado.json
+### Parsing HCL
+```csharp
+using ModPosh.HclParser;
 
-This file is used to authenticate into the Azure DevOps Rest API, and you will need a token for this, so please consult the [Documentation](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows). I include three items:
+string hclText = @"variable \"instance_count\" {\n  type = number\n  default = 1\n}";
 
-1. Orgname    : The name of the Azure DevOps organization.
-2. Token      : The PAT Token.
-3. Expiration : The expiration date.
+HclDocument doc = HclParser.Parse(hclText);
+foreach (var variable in doc.Variables)
+{
+    Console.WriteLine($"Variable: {variable.Name}, Default: {variable.Default}");
+}
+```
 
-I include the Expiration so I can get a visual indication of how long before I need to renew the token; there is logic within the psakefile to display that out when you run it.
+### Modifying HCL
+```csharp
+HclVariable variable = new HclVariable("instance_type")
+{
+    Type = "string",
+    Default = "n1-standard-1"
+};
 
-### discord.json
+HclDocument doc = new HclDocument();
+doc.Add(variable);
 
-This file is used to post a message to Discord. I have a server that I set up, and I post updates to channels for each module I use. If you wish to use the Post2Discord task, you must have a Discord account, set up a personal server, and get the webhook URL; please consult the [Documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+string outputHcl = doc.ToString();
+Console.WriteLine(outputHcl);
+```
 
-### github.json
 
-This file is used to authenticate into the GitHub API; you must set up a token for this, so please consult the [Documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). This file is also used for the ReleaseNotes task.
+## Future Enhancements
+- Support for HCL2 with nested blocks and expressions.
+- Integration with Azure DevOps for automated module updates.
+- Additional validation rules to detect deprecated or incorrect configurations.
 
-### blueksy.json
+## Contributing
+Contributions are welcome! Please follow the [contribution guidelines](CONTRIBUTING.md) and submit a pull request.
 
-This file is used to authenticate into the Bluesky Social Media platform. You must set up a token for this, so please consult the [Documentation](https://github.com/bluesky-social/atproto-ecosystem/blob/main/app-passwords.md).
+## License
+This project is licensed under the MIT License.
 
-### nuget.config
-
-This file is initially set up to publish to nuget.org and the PowerShell Gallery. You must create an API Key for this. Please consult the [Documentation](https://learn.microsoft.com/en-us/powershell/scripting/gallery/concepts/publishing-guidelines?view=powershell-7.3).
-
-> [!Caution]
-> You will want to add ado.json, discord.json, github.json, bluesky.json to your .gitignore before any commits
-> those files contain sensitive information such as passwords and credentials, they are provided here to give
-> you a place to start
-
-## PsakeFile
-
-This is the main file from which all automation is kicked off. I will go through the basic usage of this file, but for details on setting it up for your use, please refer to the file itself. The Psakefile contains a collection of Tasks. For more information on setting up and using Psake, please consult the [Documentation](https://psake.readthedocs.io/en/latest/). I will cover the basic tasks that I use so you have an understanding of how they work.
-
-### Localuse
-
-This task is run regularly, compiling the module after local changes so I can test functionality. It runs a Build but does not do any testing that would typically accompany it.
-
-### Build
-
-This task runs the LocalUse and TestProject tasks, so make sure you have some of those; otherwise, remove the reference to the TestProject Task. For more information on setting up Tests, please refer to the [Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit).
-
-### Package
-
-This task builds the help files, packages them up for deployment, and updates the README.
-
-### Deploy
-
-This task will check to make sure we have checked out the Deployment Branch, and the deployment should fail if we are not in the deployment branch. It will then create the Release Notes, compiled from the GitHub Milestones; if you are not using them, remove the reference to this task. It will then Publish the project to nuget.org, create and push a Tagged release, and create the GitHub Release.
-
-### Notifications
-
-This task will post updates to any notification channels you have set up; Post2Discord and Post2BlueSky are the defaults.
