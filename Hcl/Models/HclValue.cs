@@ -12,31 +12,31 @@ namespace ModPosh.Hcl.Models
 
         public string ToHcl()
         {
-            var debugInfo = new StringBuilder($"[DEBUG] Processing HclValue of type {Type} with value: {Value}\n");
+            //var debugInfo = new StringBuilder($"[DEBUG] Processing HclValue of type {Type} with value: {Value}\n");
 
             try
             {
                 switch (Type)
                 {
                     case HclValueType.String:
-                        debugInfo.AppendLine("[DEBUG] Handling String type.");
+                        //debugInfo.AppendLine("[DEBUG] Handling String type.");
                         return $"\"{Value}\"";
 
                     case HclValueType.Number:
                     case HclValueType.Boolean:
-                        debugInfo.AppendLine("[DEBUG] Handling Number/Boolean type.");
+                        //debugInfo.AppendLine("[DEBUG] Handling Number/Boolean type.");
                         return Value?.ToString()?.ToLowerInvariant() ?? "null";
 
                     case HclValueType.List:
-                        debugInfo.AppendLine("[DEBUG] Handling List type.");
+                        //debugInfo.AppendLine("[DEBUG] Handling List type.");
                         if (Value is List<HclValue> hclList)
                         {
-                            debugInfo.AppendLine($"[DEBUG] Expanding List<HclValue> with {hclList.Count} items.");
+                            //debugInfo.AppendLine($"[DEBUG] Expanding List<HclValue> with {hclList.Count} items.");
                             return $"[{string.Join(", ", hclList.Select(v => v.ToHcl()))}]";
                         }
                         else if (Value is List<Dictionary<string, HclValue>> dictList)
                         {
-                            debugInfo.AppendLine($"[DEBUG] Expanding List<Dictionary<string, HclValue>> with {dictList.Count} items.");
+                            //debugInfo.AppendLine($"[DEBUG] Expanding List<Dictionary<string, HclValue>> with {dictList.Count} items.");
                             var sb = new StringBuilder();
                             foreach (var dict in dictList)
                             {
@@ -49,11 +49,11 @@ namespace ModPosh.Hcl.Models
                             }
                             return sb.ToString().TrimEnd();
                         }
-                        debugInfo.AppendLine("[DEBUG] Value is not a List<HclValue> or List<Dictionary<string, HclValue>>.");
+                        //debugInfo.AppendLine("[DEBUG] Value is not a List<HclValue> or List<Dictionary<string, HclValue>>.");
                         return "[]";
 
                     case HclValueType.Map:
-                        debugInfo.AppendLine("[DEBUG] Handling Map type.");
+                        //debugInfo.AppendLine("[DEBUG] Handling Map type.");
                         if (Value is Dictionary<string, HclValue> map)
                         {
                             var sb = new StringBuilder("{\n");
@@ -64,22 +64,22 @@ namespace ModPosh.Hcl.Models
                             sb.AppendLine("}");
                             return sb.ToString().TrimEnd();
                         }
-                        debugInfo.AppendLine("[DEBUG] Value is not a Dictionary<string, HclValue>.");
+                        //debugInfo.AppendLine("[DEBUG] Value is not a Dictionary<string, HclValue>.");
                         return "{}";
 
                     default:
-                        debugInfo.AppendLine("[DEBUG] Unhandled type or null value.");
+                        //debugInfo.AppendLine("[DEBUG] Unhandled type or null value.");
                         return Value?.ToString() ?? "null";
                 }
             }
             catch (Exception ex)
             {
-                debugInfo.AppendLine($"[DEBUG] Exception encountered: {ex.Message}");
+                //debugInfo.AppendLine($"[DEBUG] Exception encountered: {ex.Message}");
                 throw;
             }
             finally
             {
-                Console.WriteLine(debugInfo.ToString());
+                //Console.WriteLine(debugInfo.ToString());
             }
         }
 

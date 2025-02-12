@@ -1,7 +1,7 @@
-# HclLexer.ChannelNames property
+# HclLexer.channelNames field
 
 ```csharp
-public override string[] ChannelNames { get; }
+public static string[] channelNames;
 ```
 
 ## See Also

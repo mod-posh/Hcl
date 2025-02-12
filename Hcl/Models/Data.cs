@@ -10,11 +10,26 @@ namespace ModPosh.Hcl.Models
     {
         public override string ToHcl()
         {
-            throw new NotImplementedException();
+            var sb = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(Type) || string.IsNullOrWhiteSpace(Name))
+                throw new InvalidOperationException("Data block must have a Type and Name.");
+
+            sb.AppendLine($"data \"{Type}\" \"{Name}\" {{");
+
+            foreach (var kvp in Body)
+            {
+                sb.AppendLine($"  {kvp.Key} = {kvp.Value.ToHcl()}");
+            }
+
+            sb.AppendLine("}");
+            return sb.ToString();
         }
+
         public override string ToJson()
         {
-            throw new NotImplementedException();
+            var keyValuePairs = Body.Select(kvp => $"\"{kvp.Key}\": {kvp.Value.ToJson()}");
+            return $"{{ \"type\": \"{Type}\", \"name\": \"{Name}\", \"body\": {{ {string.Join(", ", keyValuePairs)} }} }}";
         }
     }
 }

@@ -35,11 +35,11 @@ namespace ModPosh.Hcl.Models
         public override string ToJson()
         {
             var jsonObject = new Dictionary<string, object?>
-    {
-        { "type", "resource" },
-        { "resource_type", Type },
-        { "name", Name }
-    };
+            {
+                { "type", "resource" },
+                { "resource_type", Type },
+                { "name", Name }
+            };
 
             foreach (var kvp in Body)
             {

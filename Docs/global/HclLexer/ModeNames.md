@@ -1,7 +1,7 @@
-# HclLexer.ModeNames property
+# HclLexer.modeNames field
 
 ```csharp
-public override string[] ModeNames { get; }
+public static string[] modeNames;
 ```
 
 ## See Also

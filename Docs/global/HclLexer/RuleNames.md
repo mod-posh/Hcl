@@ -1,7 +1,7 @@
-# HclLexer.RuleNames property
+# HclLexer.ruleNames field
 
 ```csharp
-public override string[] RuleNames { get; }
+public static readonly string[] ruleNames;
 ```
 
 ## See Also
