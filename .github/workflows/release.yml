@@ -101,6 +101,8 @@ jobs:
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          git rebase origin/${{ github.ref_name }} || git pull --rebase
           git add Docs/
           git commit -m "Update documentation for release v${{ env.VERSION }}"
           git push origin ${{ github.ref_name }}
