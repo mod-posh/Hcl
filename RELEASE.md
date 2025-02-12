@@ -15,6 +15,11 @@ This is the initial release of the HCL Parser. It uses ANTLR to parse the HCL st
 * issue-10: fix port_range issue
 * issue-9: Fixed extra dot's in reference notation
 
+## DOCUMENTATION
+
+* issue-16: Add detailed error messaging
+* issue-14: Update code documentation
+
 ## ENHANCEMENT
 
 * issue-24: Update to .net 8.0
@@ -29,9 +34,4 @@ This is the initial release of the HCL Parser. It uses ANTLR to parse the HCL st
 * issue-3: Create Validator/Parser for resource files
 * issue-2: Create Validator/Parser for module files
 * issue-1: Create ANTLR Grammar File
-
-## DOCUMENTATION
-
-* issue-16: Add detailed error messaging
-* issue-14: Update code documentation
 
